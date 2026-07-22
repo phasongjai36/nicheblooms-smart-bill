@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import appCss from "../styles.css?url";
 
@@ -73,7 +74,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Smart Bill Hub — จัดการบิลและแจ้งเตือนผ่าน LINE" },
-      { name: "description", content: "Dashboard จัดการบิลผ่อน ติดตามยอดค้างชำระ และส่งแจ้งเตือนผ่าน LINE จาก Google Sheets แบบเรียลไทม์" },
+      {
+        name: "description",
+        content:
+          "Dashboard จัดการบิลผ่อน ติดตามยอดค้างชำระ และส่งแจ้งเตือนผ่าน LINE จาก Google Sheets แบบเรียลไทม์",
+      },
       { name: "author", content: "Smart Bill Hub" },
       { property: "og:title", content: "Smart Bill Hub" },
       { property: "og:description", content: "Dashboard จัดการบิลผ่อนและแจ้งเตือนผ่าน LINE" },
@@ -106,6 +111,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <SpeedInsights />
       </body>
     </html>
   );
