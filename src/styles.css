@@ -64,80 +64,80 @@
 :root {
   --radius: 1rem;
 
-  /* Nicheblooms Authentic Rosy Cream Theme */
-  --background: oklch(0.98 0.01 25); /* #fdf6f5 Soft Rosy Ivory Cream */
-  --foreground: oklch(0.34 0.04 340); /* #563b47 Deep Luxury Plum-Rose */
+  /* Nicheblooms Authentic Minimalist Champagne Cream Theme */
+  --background: oklch(0.99 0.005 85); /* #fbf9f4 Warm Minimalist Ivory Cream */
+  --foreground: oklch(0.25 0.015 35); /* #3d342f Luxury Mahogany Espresso */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.34 0.04 340);
+  --card-foreground: oklch(0.25 0.015 35);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.34 0.04 340);
+  --popover-foreground: oklch(0.25 0.015 35);
 
-  --primary: oklch(0.34 0.04 340); /* #563b47 Deep Luxury Plum-Rose */
-  --primary-foreground: oklch(0.98 0.01 25);
-  --primary-glow: oklch(0.42 0.05 340); /* #6c4755 */
+  --primary: oklch(0.25 0.015 35); /* #3d342f Deep Walnut Espresso */
+  --primary-foreground: oklch(0.99 0.005 85);
+  --primary-glow: oklch(0.35 0.02 35); /* #574c46 */
 
-  --secondary: oklch(0.97 0.012 30); /* #faf0ed Luxury Rosy Cream */
-  --secondary-foreground: oklch(0.52 0.05 340); /* #8a6375 Dusty Rose Gold */
-  --muted: oklch(0.97 0.012 30);
-  --muted-foreground: oklch(0.52 0.05 340);
-  --accent: oklch(0.52 0.05 340); /* #8a6375 Dusty Rose Accent */
-  --accent-foreground: oklch(0.98 0.01 25);
+  --secondary: oklch(0.975 0.011 86); /* #faf4eb Luxury Champagne Cream */
+  --secondary-foreground: oklch(0.48 0.035 45); /* #806b58 Dusty Gold / Sand Bronze */
+  --muted: oklch(0.975 0.011 86);
+  --muted-foreground: oklch(0.48 0.035 45);
+  --accent: oklch(0.48 0.035 45); /* #806b58 Soft Gold Accent */
+  --accent-foreground: oklch(0.99 0.005 85);
 
   /* LINE official green */
   --line: oklch(0.74 0.16 142); /* #06c755 */
   --line-foreground: oklch(1 0 0);
 
-  --success: oklch(0.34 0.04 340);
-  --warning: oklch(0.52 0.05 340);
-  --destructive: oklch(0.72 0.09 350); /* #e48aaa soft rose pink */
+  --success: oklch(0.25 0.015 35);
+  --warning: oklch(0.48 0.035 45);
+  --destructive: oklch(0.75 0.07 40); /* #dca694 Soft Terracotta Peach */
   --destructive-foreground: oklch(1 0 0);
 
-  --border: rgba(138, 99, 117, 0.15); /* Dusty plum tint border */
-  --input: rgba(138, 99, 117, 0.2);
-  --ring: oklch(0.52 0.05 340);
+  --border: rgba(128, 107, 88, 0.16); /* Sand-stone tint border */
+  --input: rgba(128, 107, 88, 0.22);
+  --ring: oklch(0.48 0.035 45);
 
-  --chart-1: oklch(0.34 0.04 340);
-  --chart-2: oklch(0.52 0.05 340);
-  --chart-3: oklch(0.42 0.05 340);
-  --chart-4: oklch(0.72 0.09 350);
+  --chart-1: oklch(0.25 0.015 35);
+  --chart-2: oklch(0.48 0.035 45);
+  --chart-3: oklch(0.35 0.02 35);
+  --chart-4: oklch(0.75 0.07 40);
   --chart-5: oklch(0.74 0.16 142);
 
-  --sidebar: oklch(0.34 0.04 340);
-  --sidebar-foreground: oklch(0.98 0.01 25);
-  --sidebar-primary: oklch(0.52 0.05 340);
-  --sidebar-primary-foreground: oklch(0.34 0.04 340);
-  --sidebar-accent: rgba(138, 99, 117, 0.1);
-  --sidebar-accent-foreground: oklch(0.98 0.01 25);
-  --sidebar-border: rgba(138, 99, 117, 0.15);
-  --sidebar-ring: oklch(0.52 0.05 340);
+  --sidebar: oklch(0.25 0.015 35);
+  --sidebar-foreground: oklch(0.99 0.005 85);
+  --sidebar-primary: oklch(0.48 0.035 45);
+  --sidebar-primary-foreground: oklch(0.25 0.015 35);
+  --sidebar-accent: rgba(128, 107, 88, 0.08);
+  --sidebar-accent-foreground: oklch(0.99 0.005 85);
+  --sidebar-border: rgba(128, 107, 88, 0.16);
+  --sidebar-ring: oklch(0.48 0.035 45);
 
-  --gradient-brand: linear-gradient(135deg, #563b47 0%, #6c4755 50%, #8a6375 100%);
-  --gradient-soft: linear-gradient(180deg, #fdf6f5 0%, #faf0ed 100%);
-  --shadow-card: 0 12px 32px rgba(86, 59, 71, 0.03), 0 1px 2px rgba(138, 99, 117, 0.05);
-  --shadow-elevated: 0 24px 80px rgba(86, 59, 71, 0.08);
+  --gradient-brand: linear-gradient(135deg, #3d342f 0%, #574c46 50%, #806b58 100%);
+  --gradient-soft: linear-gradient(180deg, #fbf9f4 0%, #faf4eb 100%);
+  --shadow-card: 0 10px 24px rgba(61, 52, 47, 0.02), 0 1px 2px rgba(128, 107, 88, 0.04);
+  --shadow-elevated: 0 20px 60px rgba(61, 52, 47, 0.06);
 
   --font-thai: "Noto Sans Thai", "Inter", system-ui, sans-serif;
   --font-display: "Sora", "Noto Sans Thai", system-ui, sans-serif;
 }
 
 .dark {
-  /* Retain warm rosy-cream values as required by NicheBlooms premium identity */
-  --background: oklch(0.98 0.01 25);
-  --foreground: oklch(0.34 0.04 340);
+  /* Retain warm ivory-cream values as required by NicheBlooms premium identity */
+  --background: oklch(0.99 0.005 85);
+  --foreground: oklch(0.25 0.015 35);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.34 0.04 340);
+  --card-foreground: oklch(0.25 0.015 35);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.34 0.04 340);
-  --primary: oklch(0.34 0.04 340);
-  --primary-foreground: oklch(0.98 0.01 25);
-  --secondary: oklch(0.97 0.012 30);
-  --secondary-foreground: oklch(0.52 0.05 340);
-  --muted: oklch(0.97 0.012 30);
-  --muted-foreground: oklch(0.52 0.05 340);
-  --accent: oklch(0.52 0.05 340);
-  --border: rgba(138, 99, 117, 0.15);
-  --input: rgba(138, 99, 117, 0.2);
-  --ring: oklch(0.52 0.05 340);
+  --popover-foreground: oklch(0.25 0.015 35);
+  --primary: oklch(0.25 0.015 35);
+  --primary-foreground: oklch(0.99 0.005 85);
+  --secondary: oklch(0.975 0.011 86);
+  --secondary-foreground: oklch(0.48 0.035 45);
+  --muted: oklch(0.975 0.011 86);
+  --muted-foreground: oklch(0.48 0.035 45);
+  --accent: oklch(0.48 0.035 45);
+  --border: rgba(128, 107, 88, 0.16);
+  --input: rgba(128, 107, 88, 0.22);
+  --ring: oklch(0.48 0.035 45);
 }
 
 @theme inline {
@@ -167,3 +167,35 @@
     letter-spacing: -0.02em;
   }
 }
+
+/* NicheBlooms Premium Background & Glassmorphic Utilities */
+.web-premium-bg {
+  background-image: linear-gradient(rgba(251, 249, 244, 0.88), rgba(250, 244, 235, 0.94)), url('/nicheblooms_web_background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.invoice-premium-bg {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.02), rgba(251, 249, 244, 0.05)), url('/nicheblooms_invoice_background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.glass-card-premium {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(128, 107, 88, 0.12) !important;
+  box-shadow: 0 12px 30px rgba(61, 52, 47, 0.02), 0 1px 2px rgba(128, 107, 88, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-premium:hover {
+  border-color: rgba(128, 107, 88, 0.24) !important;
+  box-shadow: 0 18px 45px rgba(61, 52, 47, 0.05), 0 1px 3px rgba(128, 107, 88, 0.06);
+}
+

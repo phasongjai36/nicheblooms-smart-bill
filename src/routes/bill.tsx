@@ -302,19 +302,15 @@ function CustomerBillPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[var(--background)] to-[var(--secondary)] text-[var(--foreground)] font-sans antialiased selection:bg-[var(--primary)]/10 pb-20 relative">
+    <div className="min-h-screen invoice-premium-bg text-[var(--foreground)] font-sans antialiased selection:bg-[var(--primary)]/10 pb-20 relative">
       <Toaster position="top-center" richColors />
 
-      {/* Luxury Rosy Glow Background Ornaments */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[5%] w-[45%] h-[70%] rounded-full bg-[var(--accent)]/10 blur-[130px] animate-pulse" />
-        <div className="absolute top-[-5%] right-[5%] w-[40%] h-[60%] rounded-full bg-[var(--primary)]/8 blur-[120px]" />
-      </div>
+      {/* Glow Ornaments removed/hidden to perfectly showcase the premium textured watercolor background */}
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 relative z-10 space-y-6">
         
         {/* NicheBlooms Centralized Brand Banner */}
-        <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 border border-[var(--border)] shadow-sm text-center relative overflow-hidden">
+        <div className="bg-white/60 backdrop-blur-md rounded-3xl p-6 border border-[var(--border)]/70 shadow-sm text-center relative overflow-hidden">
           {/* Botanical lines subtle decoration background */}
           <div className="absolute top-2 left-2 opacity-[0.03] select-none pointer-events-none text-left">
             ❀ 🌸 🌿
