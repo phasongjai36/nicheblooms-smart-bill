@@ -16,7 +16,7 @@ async function getAuth() {
   if (!privateKey || !clientEmail) {
     throw new Error(
       "GOOGLE_PRIVATE_KEY or GOOGLE_SERVICE_ACCOUNT_EMAIL environment variable is missing. " +
-      "Please set them in your .env.local file to connect to Google Drive."
+        "Please set them in your .env.local file to connect to Google Drive.",
     );
   }
 
@@ -36,7 +36,7 @@ async function getAuth() {
 
 // Uploads a base64 encoded slip image to Google Drive, categorizes it by Customer, and returns a shareable link.
 export const uploadSlipToDrive = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => UploadInputSchema.parse(input))
+  .validator((input: unknown) => UploadInputSchema.parse(input))
   .handler(async ({ data }) => {
     try {
       const { auth, google } = await getAuth();
@@ -46,7 +46,9 @@ export const uploadSlipToDrive = createServerFn({ method: "POST" })
 
       // 1. If no parent folder ID is specified, locate or create a root folder named "NICHE BLOOM Slips"
       if (!parentFolderId) {
-        console.log("No GOOGLE_DRIVE_SLIPS_FOLDER_ID in env, searching for 'NICHE BLOOM Slips' folder...");
+        console.log(
+          "No GOOGLE_DRIVE_SLIPS_FOLDER_ID in env, searching for 'NICHE BLOOM Slips' folder...",
+        );
         const listRes = await drive.files.list({
           q: "name = 'NICHE BLOOM Slips' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
           fields: "files(id)",
@@ -79,7 +81,7 @@ export const uploadSlipToDrive = createServerFn({ method: "POST" })
       let targetFolderId = parentFolderId;
       const subfolderName = `NICHE BLOOM Slips - ${data.customerNumber}`;
       console.log(`Searching for subfolder: '${subfolderName}'...`);
-      
+
       const sublistRes = await drive.files.list({
         q: `name = '${subfolderName}' and '${parentFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
         fields: "files(id)",

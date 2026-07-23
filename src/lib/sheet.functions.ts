@@ -3,7 +3,8 @@ import { z } from "zod";
 import masterDb from "./latest_master.json";
 import { supabase, supabaseAdmin } from "./supabase";
 
-const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || "1uHZZeh1epL2656CQrCJ4QsSQDDJ5TNQ42jpiXaXvCac";
+const SPREADSHEET_ID =
+  process.env.GOOGLE_SHEET_ID || "1uHZZeh1epL2656CQrCJ4QsSQDDJ5TNQ42jpiXaXvCac";
 const SHEET_NAME = "spayleter";
 
 export type BillRow = {
@@ -61,7 +62,7 @@ function initSimulatedBills() {
 
   simulatedBills = contracts.map((c, i) => {
     const cust = customers.find((cust) => cust["Customer Number"] === c["Customer Number"]) || {
-      "ชื่อลูกค้า": "ลูกค้าทั่วไป",
+      ชื่อลูกค้า: "ลูกค้าทั่วไป",
       "UID (LINE)": "",
     };
     return {
@@ -158,7 +159,7 @@ async function getAuth() {
   if (!privateKey || !clientEmail) {
     throw new Error(
       "GOOGLE_PRIVATE_KEY or GOOGLE_SERVICE_ACCOUNT_EMAIL environment variable is missing. " +
-      "Please set them in your .env.local file to connect to Google Sheets."
+        "Please set them in your .env.local file to connect to Google Sheets.",
     );
   }
 
@@ -172,7 +173,7 @@ async function getAuth() {
     },
     scopes: [
       "https://www.googleapis.com/auth/spreadsheets",
-      "https://www.googleapis.com/auth/drive"
+      "https://www.googleapis.com/auth/drive",
     ],
   });
 
@@ -186,7 +187,7 @@ export const fetchBills = createServerFn({ method: "GET" }).handler(async () => 
   if (isSupabase) {
     try {
       console.log("🔌 Database Provider: SUPABASE (Active)");
-      
+
       // ตรวจสอบและ Auto-Seed ข้อมูลเบื้องต้นถ้าไม่มีข้อมูลในฐานข้อมูล
       await autoSeedSupabaseIfNeeded();
 
@@ -194,7 +195,10 @@ export const fetchBills = createServerFn({ method: "GET" }).handler(async () => 
 
       // 1. ดึงข้อมูลจาก Supabase
       const { data: customers, error: custError } = await client.from("customers").select("*");
-      const { data: contracts, error: contrError } = await client.from("contracts").select("*").order("created_at", { ascending: true });
+      const { data: contracts, error: contrError } = await client
+        .from("contracts")
+        .select("*")
+        .order("created_at", { ascending: true });
 
       if (custError || contrError) {
         throw new Error(`Supabase query failed: ${custError?.message || contrError?.message}`);
@@ -202,7 +206,9 @@ export const fetchBills = createServerFn({ method: "GET" }).handler(async () => 
 
       // 2. แปรรูปข้อมูลให้อยู่ในโมเดล BillRow
       const rows: BillRow[] = (contracts || []).map((c, i) => {
-        const cust = (customers || []).find((cust) => cust.customer_number === c.customer_number) || {
+        const cust = (customers || []).find(
+          (cust) => cust.customer_number === c.customer_number,
+        ) || {
           customer_name: "ลูกค้าทั่วไป",
           line_uid: "",
         };
@@ -248,7 +254,7 @@ export const fetchBills = createServerFn({ method: "GET" }).handler(async () => 
       }
 
       const groups = Array.from(map.values()).sort((a, b) =>
-        a.customer.localeCompare(b.customer, "th")
+        a.customer.localeCompare(b.customer, "th"),
       );
 
       const totals = {
@@ -270,9 +276,11 @@ export const fetchBills = createServerFn({ method: "GET" }).handler(async () => 
   const isSimulator = checkIsSimulator();
 
   if (isSimulator) {
-    console.log("⚡ Running in Google Sheets SIMULATOR Mode. Using high-fidelity local master database.");
+    console.log(
+      "⚡ Running in Google Sheets SIMULATOR Mode. Using high-fidelity local master database.",
+    );
     initSimulatedBills();
-    
+
     const rows = simulatedBills!;
     const map = new Map<string, CustomerGroup>();
     for (const row of rows) {
@@ -297,7 +305,7 @@ export const fetchBills = createServerFn({ method: "GET" }).handler(async () => 
     }
 
     const groups = Array.from(map.values()).sort((a, b) =>
-      a.customer.localeCompare(b.customer, "th")
+      a.customer.localeCompare(b.customer, "th"),
     );
 
     const totals = {
@@ -365,7 +373,7 @@ export const fetchBills = createServerFn({ method: "GET" }).handler(async () => 
     }
 
     const groups = Array.from(map.values()).sort((a, b) =>
-      a.customer.localeCompare(b.customer, "th")
+      a.customer.localeCompare(b.customer, "th"),
     );
 
     const totals = {
@@ -396,13 +404,15 @@ const UpdateInputSchema = z.object({
 
 // Update bill status and log changes directly via Supabase, Google Sheets, or local database simulator
 export const updateBillStatus = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => UpdateInputSchema.parse(input))
+  .validator((input: unknown) => UpdateInputSchema.parse(input))
   .handler(async ({ data }) => {
     const isSupabase = process.env.DATABASE_PROVIDER === "supabase";
 
     if (isSupabase) {
       try {
-        console.log(`🔌 Supabase: Updating status for row index ${data.rowIndex} to state: ${data.status}`);
+        console.log(
+          `🔌 Supabase: Updating status for row index ${data.rowIndex} to state: ${data.status}`,
+        );
         const client = supabaseAdmin || supabase;
 
         // 1. ดึงสัญญาทั้งหมดเพื่อค้นหาตามลำดับแถว (หรือสามารถคิวรีด้วยคีย์เฉพาะถ้ามี)
@@ -436,17 +446,15 @@ export const updateBillStatus = createServerFn({ method: "POST" })
 
           // บันทึกประวัติการจ่ายเงินลงตาราง payment_logs บน Supabase (แบบเรียลไทม์)
           try {
-            await client
-              .from("payment_logs")
-              .insert({
-                row_index: data.rowIndex,
-                status: data.status,
-                slip_url: data.slipUrl || null,
-                slip_date: data.slipDate || new Date().toLocaleString("th-TH"),
-                amount: data.amount || Number(contract.installment) || 0.00,
-                sender: data.sender || null,
-                trans_ref: data.transRef || null,
-              });
+            await client.from("payment_logs").insert({
+              row_index: data.rowIndex,
+              status: data.status,
+              slip_url: data.slipUrl || null,
+              slip_date: data.slipDate || new Date().toLocaleString("th-TH"),
+              amount: data.amount || Number(contract.installment) || 0.0,
+              sender: data.sender || null,
+              trans_ref: data.transRef || null,
+            });
             console.log("✅ Supabase: Payment log inserted successfully!");
           } catch (logError) {
             console.warn("⚠️ Warning: Failed to insert payment log in Supabase:", logError);
@@ -467,11 +475,12 @@ export const updateBillStatus = createServerFn({ method: "POST" })
     if (isSimulator) {
       console.log(`⚡ Simulator updating rowIndex: ${data.rowIndex} to state: ${data.status}`);
       initSimulatedBills();
-      
+
       const item = simulatedBills!.find((b) => b.rowIndex === data.rowIndex);
       if (item) {
         item.status = data.status;
-        item.slipUrl = data.slipUrl ?? "https://images.unsplash.com/photo-1628157582853-a796fa650a6a?q=80&w=200";
+        item.slipUrl =
+          data.slipUrl ?? "https://images.unsplash.com/photo-1628157582853-a796fa650a6a?q=80&w=200";
         item.slipDate = data.slipDate ?? new Date().toLocaleString("th-TH");
         // Simulate local period increment logic if paid
         if (/ชำระแล้ว|paid|จ่ายแล้ว/i.test(data.status)) {
@@ -492,14 +501,8 @@ export const updateBillStatus = createServerFn({ method: "POST" })
         range,
         valueInputOption: "USER_ENTERED",
         requestBody: {
-          values: [
-            [
-              data.slipUrl ?? "",
-              data.slipDate ?? "",
-              data.status
-            ]
-          ]
-        }
+          values: [[data.slipUrl ?? "", data.slipDate ?? "", data.status]],
+        },
       });
 
       // 2. Log payment in Payment_Logs sheet (Robust fallback so failure here doesn't crash the main status update)
@@ -519,12 +522,15 @@ export const updateBillStatus = createServerFn({ method: "POST" })
                 data.amount ?? 0,
                 data.sender ?? "",
                 data.transRef ?? "",
-              ]
-            ]
-          }
+              ],
+            ],
+          },
         });
       } catch (logError) {
-        console.warn("Payment log append failed (Payment_Logs sheet might be missing or locked):", logError);
+        console.warn(
+          "Payment log append failed (Payment_Logs sheet might be missing or locked):",
+          logError,
+        );
         // Do not fail the outer operation if only logging failed
       }
 
@@ -545,7 +551,7 @@ const EditInputSchema = z.object({
 });
 
 export const editBillRow = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => EditInputSchema.parse(input))
+  .validator((input: unknown) => EditInputSchema.parse(input))
   .handler(async ({ data }) => {
     const isSupabase = process.env.DATABASE_PROVIDER === "supabase";
 
@@ -645,7 +651,7 @@ const CreateInputSchema = z.object({
 });
 
 export const createBillRow = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => CreateInputSchema.parse(input))
+  .validator((input: unknown) => CreateInputSchema.parse(input))
   .handler(async ({ data }) => {
     const isSupabase = process.env.DATABASE_PROVIDER === "supabase";
 
@@ -655,36 +661,34 @@ export const createBillRow = createServerFn({ method: "POST" })
         const client = supabaseAdmin || supabase;
 
         // 1. ตรวจสอบหรือสร้างข้อมูลผู้ใช้ในตาราง customers ก่อน (หรืออัปเดตแบบ Upsert)
-        const { error: custError } = await client
-          .from("customers")
-          .upsert(
-            {
-              customer_number: data.no,
-              customer_name: data.customer,
-              line_uid: data.lineUserId || null,
-            },
-            { onConflict: "customer_number" }
-          );
+        const { error: custError } = await client.from("customers").upsert(
+          {
+            customer_number: data.no,
+            customer_name: data.customer,
+            line_uid: data.lineUserId || null,
+          },
+          { onConflict: "customer_number" },
+        );
 
         if (custError) throw custError;
 
         // 2. เพิ่มรายการสัญญาเงินกู้/สัญญาผ่อนชำระ
-        const { error: contractError } = await client
-          .from("contracts")
-          .insert({
-            customer_number: data.no,
-            item: data.item,
-            full_price: data.fullPrice,
-            installment: data.installment,
-            current_period: data.currentPeriod,
-            total_periods: data.totalPeriods,
-            status: "ค้างชำระ",
-            due_date: data.dueDate,
-            late_fee_rate: data.lateFeeRate,
-          });
+        const { error: contractError } = await client.from("contracts").insert({
+          customer_number: data.no,
+          item: data.item,
+          full_price: data.fullPrice,
+          installment: data.installment,
+          current_period: data.currentPeriod,
+          total_periods: data.totalPeriods,
+          status: "ค้างชำระ",
+          due_date: data.dueDate,
+          late_fee_rate: data.lateFeeRate,
+        });
 
         if (contractError) throw contractError;
-        console.log(`✅ Supabase: Successfully created user and contract row for: ${data.customer}`);
+        console.log(
+          `✅ Supabase: Successfully created user and contract row for: ${data.customer}`,
+        );
         return { ok: true };
       } catch (err) {
         console.error("🚨 Supabase contract creation failed:", err);
@@ -697,7 +701,7 @@ export const createBillRow = createServerFn({ method: "POST" })
     if (isSimulator) {
       console.log(`⚡ Simulator creating new bill row for: ${data.customer}`);
       initSimulatedBills();
-      
+
       const newRow: BillRow = {
         rowIndex: simulatedBills!.length + 2,
         no: data.no || `CNNB${String(simulatedBills!.length + 1).padStart(3, "0")}`,
@@ -714,7 +718,7 @@ export const createBillRow = createServerFn({ method: "POST" })
         dueDate: data.dueDate,
         lateFeeRate: data.lateFeeRate,
       };
-      
+
       simulatedBills!.push(newRow);
       return { ok: true };
     }
@@ -744,9 +748,9 @@ export const createBillRow = createServerFn({ method: "POST" })
               "ค้างชำระ", // status
               data.dueDate,
               data.lateFeeRate,
-            ]
-          ]
-        }
+            ],
+          ],
+        },
       });
 
       return { ok: true };
@@ -771,8 +775,8 @@ export interface PaymentLog {
 }
 
 // Fetch transaction history log directly from Supabase payment_logs or simulator fallback
-export const fetchPaymentLogs = createServerFn({ method: "GET" })
-  .handler(async (): Promise<PaymentLog[]> => {
+export const fetchPaymentLogs = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PaymentLog[]> => {
     const isSupabase = process.env.DATABASE_PROVIDER === "supabase";
 
     if (isSupabase) {
@@ -792,22 +796,25 @@ export const fetchPaymentLogs = createServerFn({ method: "GET" })
         const { data: contracts } = await client.from("contracts").select("*");
         const { data: customers } = await client.from("customers").select("*");
 
-        return (logs || []).map((l: any) => {
-          const contract = (contracts || []).find((_, idx) => (idx + 2) === l.row_index);
-          const customer = contract 
+        return (logs || []).map((l) => {
+          const row = l as Record<string, unknown>;
+          const contract = (contracts || []).find(
+            (_, idx) => idx + 2 === (row.row_index as number),
+          );
+          const customer = contract
             ? (customers || []).find((c) => c.customer_number === contract.customer_number)
             : null;
 
           return {
-            id: l.id,
-            createdAt: l.created_at,
-            rowIndex: l.row_index,
-            status: l.status,
-            slipUrl: l.slip_url,
-            slipDate: l.slip_date,
-            amount: Number(l.amount) || 0.00,
-            sender: l.sender,
-            transRef: l.trans_ref,
+            id: row.id as string,
+            createdAt: row.created_at as string,
+            rowIndex: row.row_index as number,
+            status: row.status as string,
+            slipUrl: row.slip_url as string | null,
+            slipDate: row.slip_date as string | null,
+            amount: Number(row.amount) || 0.0,
+            sender: row.sender as string | null,
+            transRef: row.trans_ref as string | null,
             customerName: customer?.customer_name || "ลูกค้าทั่วไป",
             itemName: contract?.item || "งวดผ่อนชำระ",
           };
@@ -845,8 +852,8 @@ export const fetchPaymentLogs = createServerFn({ method: "GET" })
         transRef: "202607214451299",
         customerName: "พัชราภา เลิศดี",
         itemName: "iPad Air 5 Wifi 64GB",
-      }
+      },
     ];
     return mockLogs;
-  });
-
+  },
+);

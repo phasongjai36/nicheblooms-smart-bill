@@ -27,7 +27,16 @@ import {
   Pencil,
   Plus,
 } from "lucide-react";
-import { fetchBills, updateBillStatus, editBillRow, createBillRow, fetchPaymentLogs, type CustomerGroup, type BillRow, type PaymentLog } from "@/lib/sheet.functions";
+import {
+  fetchBills,
+  updateBillStatus,
+  editBillRow,
+  createBillRow,
+  fetchPaymentLogs,
+  type CustomerGroup,
+  type BillRow,
+  type PaymentLog,
+} from "@/lib/sheet.functions";
 import { sendLineNotification } from "@/lib/line.functions";
 import { scanSlipWithAi, type SlipDetails } from "@/lib/gemini.functions";
 import { toast, Toaster } from "sonner";
@@ -116,7 +125,7 @@ const NICHEBLOOMS_MOCK_DATA = {
       status: "ค้างชำระ",
       dueDate: "10",
       lateFeeRate: 50,
-    }
+    },
   ],
   groups: [
     {
@@ -141,8 +150,8 @@ const NICHEBLOOMS_MOCK_DATA = {
           status: "ค้างชำระ",
           dueDate: "5",
           lateFeeRate: 50,
-        }
-      ]
+        },
+      ],
     },
     {
       customer: "คุณณัฏฐ์ (Niche VIP)",
@@ -166,8 +175,8 @@ const NICHEBLOOMS_MOCK_DATA = {
           status: "ค้างชำระ",
           dueDate: "5",
           lateFeeRate: 50,
-        }
-      ]
+        },
+      ],
     },
     {
       customer: "คุณกมลวรรณ (Niche Premium)",
@@ -191,8 +200,8 @@ const NICHEBLOOMS_MOCK_DATA = {
           status: "ชำระแล้ว",
           dueDate: "5",
           lateFeeRate: 50,
-        }
-      ]
+        },
+      ],
     },
     {
       customer: "คุณจิรายุ (Niche Classic)",
@@ -216,10 +225,10 @@ const NICHEBLOOMS_MOCK_DATA = {
           status: "ค้างชำระ",
           dueDate: "10",
           lateFeeRate: 50,
-        }
-      ]
-    }
-  ]
+        },
+      ],
+    },
+  ],
 };
 
 const MOCK_PAYMENT_LOGS: PaymentLog[] = [
@@ -234,7 +243,7 @@ const MOCK_PAYMENT_LOGS: PaymentLog[] = [
     transRef: "01620314300098374",
     slipUrl: "https://fake-slip-storage.example.com/demo-tulip",
     slipDate: "2026-07-22 14:30:00",
-  }
+  },
 ];
 
 function Dashboard() {
@@ -246,12 +255,23 @@ function Dashboard() {
   const createBillFn = useServerFn(createBillRow);
   const fetchLogsFn = useServerFn(fetchPaymentLogs);
 
-  const { data: serverData, isLoading, isFetching, refetch, error } = useQuery({
+  const {
+    data: serverData,
+    isLoading,
+    isFetching,
+    refetch,
+    error,
+  } = useQuery({
     queryKey: ["bills"],
     queryFn: () => fetchFn(),
   });
 
-  const { data: serverLogs, isLoading: isLogsLoading, isFetching: isLogsFetching, refetch: refetchLogs } = useQuery({
+  const {
+    data: serverLogs,
+    isLoading: isLogsLoading,
+    isFetching: isLogsFetching,
+    refetch: refetchLogs,
+  } = useQuery({
     queryKey: ["paymentLogs"],
     queryFn: () => fetchLogsFn(),
   });
@@ -276,7 +296,8 @@ function Dashboard() {
     const groupsMap = new Map<string, BillRow[]>();
     activeBillsList.forEach((row) => {
       // Create a unique key for grouping (either lineUserId or customer name)
-      const key = (row.lineUserId && row.lineUserId.trim()) ? row.lineUserId.trim() : row.customer.trim();
+      const key =
+        row.lineUserId && row.lineUserId.trim() ? row.lineUserId.trim() : row.customer.trim();
       if (!groupsMap.has(key)) {
         groupsMap.set(key, []);
       }
@@ -286,8 +307,11 @@ function Dashboard() {
     const groups: CustomerGroup[] = Array.from(groupsMap.entries()).map(([key, items]) => {
       const first = items[0];
       // Total installment is the sum of installments of unpaid bills in current cycle
-      const totalInstallment = items.reduce((sum, item) => sum + (!/ชำระ|paid|จ่าย/i.test(item.status) ? item.installment : 0), 0);
-      
+      const totalInstallment = items.reduce(
+        (sum, item) => sum + (!/ชำระ|paid|จ่าย/i.test(item.status) ? item.installment : 0),
+        0,
+      );
+
       // Calculate remaining based on installments left
       const totalRemaining = items.reduce((sum, item) => {
         const isPaid = /ชำระ|paid|จ่าย/i.test(item.status);
@@ -309,12 +333,17 @@ function Dashboard() {
     // Recalculate totals
     const customersCount = groups.length;
     const activeBillsCount = activeBillsList.length;
-    const paidCount = activeBillsList.filter((r) => /ชำระแล้ว|paid|จ่ายแล้ว/i.test(r.status)).length;
-    const outstandingSum = activeBillsList.reduce((sum, r) => !/ชำระ|paid|จ่าย/i.test(r.status) ? sum + r.installment : sum, 0);
+    const paidCount = activeBillsList.filter((r) =>
+      /ชำระแล้ว|paid|จ่ายแล้ว/i.test(r.status),
+    ).length;
+    const outstandingSum = activeBillsList.reduce(
+      (sum, r) => (!/ชำระ|paid|จ่าย/i.test(r.status) ? sum + r.installment : sum),
+      0,
+    );
     const monthlyDueSum = activeBillsList.reduce((sum, r) => sum + r.installment, 0);
 
     return {
-      provider: localBills ? "local_simulator" : (serverData?.provider || "local_simulator"),
+      provider: localBills ? "local_simulator" : serverData?.provider || "local_simulator",
       rows: activeBillsList,
       groups,
       totals: {
@@ -335,7 +364,7 @@ function Dashboard() {
 
   const [activeTab, setActiveTab] = useState<"customers" | "logs">("customers");
   const [q, setQ] = useState("");
-  
+
   // Modals / Overlays state
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isLinePreviewOpen, setIsLinePreviewOpen] = useState(false);
@@ -416,19 +445,23 @@ function Dashboard() {
           status: newStatus,
           slipUrl: row.slipUrl,
           slipDate: row.slipDate,
-        }
+        },
       });
       toast.success(`อัปเดตสถานะของ ${row.customer} เป็น "${newStatus}" สำเร็จ`);
-      
+
       const currentList = localBills || resolvedData.rows;
-      const updated = currentList.map(r => r.rowIndex === row.rowIndex ? { ...r, status: newStatus } : r);
+      const updated = currentList.map((r) =>
+        r.rowIndex === row.rowIndex ? { ...r, status: newStatus } : r,
+      );
       setLocalBills(updated);
 
       queryClient.invalidateQueries({ queryKey: ["bills"] });
       queryClient.invalidateQueries({ queryKey: ["paymentLogs"] });
     } catch (e) {
       const currentList = localBills || resolvedData.rows;
-      const updated = currentList.map(r => r.rowIndex === row.rowIndex ? { ...r, status: newStatus } : r);
+      const updated = currentList.map((r) =>
+        r.rowIndex === row.rowIndex ? { ...r, status: newStatus } : r,
+      );
       setLocalBills(updated);
       toast.success(`จำลองการอัปเดตสถานะของ ${row.customer} เป็น "${newStatus}" เรียบร้อยค่ะ`);
     } finally {
@@ -458,19 +491,25 @@ function Dashboard() {
           lateFeeRate: editLateFeeRate,
           currentPeriod: editCurrentPeriod,
           totalPeriods: editTotalPeriods,
-        }
+        },
       });
-      toast.success(`อัปเดตสัญญารายการ "${selectedRowToEdit.item}" ของคุณ "${selectedRowToEdit.customer}" สำเร็จ!`);
-      
+      toast.success(
+        `อัปเดตสัญญารายการ "${selectedRowToEdit.item}" ของคุณ "${selectedRowToEdit.customer}" สำเร็จ!`,
+      );
+
       const currentList = localBills || resolvedData.rows;
-      const updated = currentList.map(r => r.rowIndex === selectedRowToEdit.rowIndex ? {
-        ...r,
-        installment: editInstallment,
-        dueDate: editDueDate,
-        lateFeeRate: editLateFeeRate,
-        currentPeriod: editCurrentPeriod,
-        totalPeriods: editTotalPeriods,
-      } : r);
+      const updated = currentList.map((r) =>
+        r.rowIndex === selectedRowToEdit.rowIndex
+          ? {
+              ...r,
+              installment: editInstallment,
+              dueDate: editDueDate,
+              lateFeeRate: editLateFeeRate,
+              currentPeriod: editCurrentPeriod,
+              totalPeriods: editTotalPeriods,
+            }
+          : r,
+      );
       setLocalBills(updated);
 
       queryClient.invalidateQueries({ queryKey: ["bills"] });
@@ -478,14 +517,18 @@ function Dashboard() {
       setSelectedRowToEdit(null);
     } catch (e) {
       const currentList = localBills || resolvedData.rows;
-      const updated = currentList.map(r => r.rowIndex === selectedRowToEdit.rowIndex ? {
-        ...r,
-        installment: editInstallment,
-        dueDate: editDueDate,
-        lateFeeRate: editLateFeeRate,
-        currentPeriod: editCurrentPeriod,
-        totalPeriods: editTotalPeriods,
-      } : r);
+      const updated = currentList.map((r) =>
+        r.rowIndex === selectedRowToEdit.rowIndex
+          ? {
+              ...r,
+              installment: editInstallment,
+              dueDate: editDueDate,
+              lateFeeRate: editLateFeeRate,
+              currentPeriod: editCurrentPeriod,
+              totalPeriods: editTotalPeriods,
+            }
+          : r,
+      );
       setLocalBills(updated);
       toast.success(`จำลองการอัปเดตสัญญารายการ "${selectedRowToEdit.item}" เรียบร้อยค่ะ!`);
       setIsEditModalOpen(false);
@@ -504,7 +547,7 @@ function Dashboard() {
     const generatedNo = newCustomerNo || `CNNB${Date.now().toString().slice(-6)}`;
     const currentList = localBills || resolvedData.rows;
     const nextRowIndex = currentList.reduce((max, r) => Math.max(max, r.rowIndex), 0) + 1;
-    
+
     const newRow: BillRow = {
       rowIndex: nextRowIndex,
       no: generatedNo,
@@ -535,13 +578,13 @@ function Dashboard() {
           totalPeriods: newTotalPeriods,
           dueDate: newDueDate,
           lateFeeRate: newLateFeeRate,
-        }
+        },
       });
       toast.success(`สร้างใบผ่อนสินค้าของคุณ "${newCustomerName}" เรียบร้อยแล้วค่ะ!`);
-      
+
       setLocalBills([...currentList, newRow]);
       queryClient.invalidateQueries({ queryKey: ["bills"] });
-      
+
       // Reset form fields
       setNewCustomerName("");
       setNewCustomerNo("");
@@ -553,12 +596,12 @@ function Dashboard() {
       setNewDueDate("5");
       setNewLateFeeRate(50);
       setNewLineUserId("");
-      
+
       setIsCreateModalOpen(false);
     } catch (e) {
       setLocalBills([...currentList, newRow]);
       toast.success(`จำลองการสร้างใบผ่อนสินค้าของคุณ "${newCustomerName}" เรียบร้อยแล้วค่ะ!`);
-      
+
       setNewCustomerName("");
       setNewCustomerNo("");
       setNewItemName("");
@@ -569,7 +612,7 @@ function Dashboard() {
       setNewDueDate("5");
       setNewLateFeeRate(50);
       setNewLineUserId("");
-      
+
       setIsCreateModalOpen(false);
     } finally {
       setSavingCreate(false);
@@ -579,12 +622,13 @@ function Dashboard() {
   // LINE Preview Customizer
   const openLinePreview = (group: CustomerGroup) => {
     setSelectedGroupForLine(group);
-    
+
     // Auto-generate beautiful pre-composed luxury notification
     const totalInst = group.items.reduce((sum, item) => sum + item.installment, 0);
     const dueDate = group.items[0]?.dueDate || "5";
-    const msg = `❀ NicheBlooms Reminder ❀\n\nเรียนคุณ ${group.customer} คะ\n\nทางร้านดอกไม้ NicheBlooms ขอส่งสรุปยอดผ่อนชำระงวดประจำรอบบิลเดือนนี้ค่ะ\n\n🌸 รายการ: ${group.items.map(i => `${i.item} (งวดที่ ${i.currentPeriod}/${i.totalPeriods})`).join(", ")}\n💵 ยอดโอนประจำเดือน: ${baht(totalInst)}\n📅 กำหนดชำระ: ภายในวันที่ ${dueDate} ของเดือนค่ะ\n\nคุณสามารถตรวจสอบรายละเอียดสัญญาทั้งหมด และสแกนคิวอาร์โค้ดอัปโหลดหลักฐานสลีปเพื่อตรวจสอบอัติโนมัติผ่าน AI ได้ง่าย ๆ ที่ลิงก์ด้านล่างนี้เลยนะคะ:\n🔗 https://nicheblooms.vercel.app/bill?uid=${group.lineUserId}\n\nขอบพระคุณที่ร่วมสรรสร้างและไว้วางใจให้ร้านดอกไม้พรีเมียมของเราดูแลคุณคนสำคัญค่ะ ❀✨`;
-    
+    const baseUrl = import.meta.env.VITE_APP_BASE_URL || window.location.origin;
+    const msg = `❀ NicheBlooms Reminder ❀\n\nเรียนคุณ ${group.customer} คะ\n\nทางร้านดอกไม้ NicheBlooms ขอส่งสรุปยอดผ่อนชำระงวดประจำรอบบิลเดือนนี้ค่ะ\n\n🌸 รายการ: ${group.items.map((i) => `${i.item} (งวดที่ ${i.currentPeriod}/${i.totalPeriods})`).join(", ")}\n💵 ยอดโอนประจำเดือน: ${baht(totalInst)}\n📅 กำหนดชำระ: ภายในวันที่ ${dueDate} ของเดือนค่ะ\n\nคุณสามารถตรวจสอบรายละเอียดสัญญาทั้งหมด และสแกนคิวอาร์โค้ดอัปโหลดหลักฐานสลีปเพื่อตรวจสอบอัติโนมัติผ่าน AI ได้ง่าย ๆ ที่ลิงก์ด้านล่างนี้เลยนะคะ:\n🔗 ${baseUrl}/bill?uid=${group.lineUserId}\n\nขอบพระคุณที่ร่วมสรรสร้างและไว้วางใจให้ร้านดอกไม้พรีเมียมของเราดูแลคุณคนสำคัญค่ะ ❀✨`;
+
     setCustomMessage(msg);
     setIsLinePreviewOpen(true);
   };
@@ -667,9 +711,8 @@ function Dashboard() {
       // Try smart matching: find outstanding bill row that matches the amount
       const amt = result.amount;
       // Search rows for pending items with installment close to amount
-      const matchingRow = resolvedData.rows.find((row) => 
-        !/ชำระ|paid|จ่าย/i.test(row.status) && 
-        Math.abs(row.installment - amt) < 10
+      const matchingRow = resolvedData.rows.find(
+        (row) => !/ชำระ|paid|จ่าย/i.test(row.status) && Math.abs(row.installment - amt) < 10,
       );
       if (matchingRow) {
         setSelectedMatchRowIndex(matchingRow.rowIndex);
@@ -685,9 +728,11 @@ function Dashboard() {
   const handleSaveScanResult = async () => {
     if (!scannedDetails || !selectedMatchRowIndex) return;
     setSavingScanResult(true);
-    
-    const existingRow = resolvedData.rows.find(r => r.rowIndex === selectedMatchRowIndex);
-    const slipUrl = existingRow?.slipUrl || "https://fake-slip-storage.example.com/" + scannedDetails.transactionId;
+
+    const existingRow = resolvedData.rows.find((r) => r.rowIndex === selectedMatchRowIndex);
+    const slipUrl =
+      existingRow?.slipUrl ||
+      "https://fake-slip-storage.example.com/" + scannedDetails.transactionId;
     const slipDate = scannedDetails.date + " " + scannedDetails.time;
 
     // Create a new mock payment log entry
@@ -711,25 +756,29 @@ function Dashboard() {
           status: "ชำระแล้ว",
           slipUrl,
           slipDate,
-        }
+        },
       });
 
       toast.success(`บันทึกสถานะการชำระเงินและสลิปสำเร็จ!`);
-      
+
       const currentList = localBills || resolvedData.rows;
-      const updated = currentList.map(r => r.rowIndex === selectedMatchRowIndex ? {
-        ...r,
-        status: "ชำระแล้ว",
-        slipUrl,
-        slipDate,
-      } : r);
+      const updated = currentList.map((r) =>
+        r.rowIndex === selectedMatchRowIndex
+          ? {
+              ...r,
+              status: "ชำระแล้ว",
+              slipUrl,
+              slipDate,
+            }
+          : r,
+      );
       setLocalBills(updated);
       setLocalLogs([newLog, ...resolvedLogs]);
 
       queryClient.invalidateQueries({ queryKey: ["bills"] });
       queryClient.invalidateQueries({ queryKey: ["paymentLogs"] });
       setIsScannerOpen(false);
-      
+
       // Reset scanner states
       setSlipFile(null);
       setSlipPreview(null);
@@ -737,18 +786,22 @@ function Dashboard() {
       setSelectedMatchRowIndex(null);
     } catch (e) {
       const currentList = localBills || resolvedData.rows;
-      const updated = currentList.map(r => r.rowIndex === selectedMatchRowIndex ? {
-        ...r,
-        status: "ชำระแล้ว",
-        slipUrl,
-        slipDate,
-      } : r);
+      const updated = currentList.map((r) =>
+        r.rowIndex === selectedMatchRowIndex
+          ? {
+              ...r,
+              status: "ชำระแล้ว",
+              slipUrl,
+              slipDate,
+            }
+          : r,
+      );
       setLocalBills(updated);
       setLocalLogs([newLog, ...resolvedLogs]);
 
       toast.success(`จำลองการบันทึกสถานะการชำระเงินและสลิปสำเร็จ!`);
       setIsScannerOpen(false);
-      
+
       // Reset scanner states
       setSlipFile(null);
       setSlipPreview(null);
@@ -762,7 +815,7 @@ function Dashboard() {
   return (
     <div className="min-h-screen web-premium-bg pb-12">
       <Toaster position="top-right" richColors closeButton />
-      
+
       {/* Styles for green laser scan line */}
       <style>{`
         @keyframes scan {
@@ -783,16 +836,24 @@ function Dashboard() {
             <div>
               <h1 className="font-display text-xl font-bold leading-none flex flex-wrap items-center gap-1.5">
                 NicheBlooms Admin
-                <span className="text-[10px] uppercase font-semibold bg-success/15 text-success px-1.5 py-0.5 rounded-md tracking-wider">PRO</span>
+                <span className="text-[10px] uppercase font-semibold bg-success/15 text-success px-1.5 py-0.5 rounded-md tracking-wider">
+                  PRO
+                </span>
                 {resolvedData?.provider && (
-                  <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-md tracking-wider ${
-                    resolvedData.provider === "supabase" 
-                      ? "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
+                  <span
+                    className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-md tracking-wider ${
+                      resolvedData.provider === "supabase"
+                        ? "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
+                        : resolvedData.provider === "sheets"
+                          ? "bg-emerald-600/10 text-emerald-600 border border-emerald-600/20"
+                          : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                    }`}
+                  >
+                    {resolvedData.provider === "supabase"
+                      ? "Supabase Cloud"
                       : resolvedData.provider === "sheets"
-                      ? "bg-emerald-600/10 text-emerald-600 border border-emerald-600/20"
-                      : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                  }`}>
-                    {resolvedData.provider === "supabase" ? "Supabase Cloud" : resolvedData.provider === "sheets" ? "Google Sheets" : "Simulator Mode"}
+                        ? "Google Sheets"
+                        : "Simulator Mode"}
                   </span>
                 )}
               </h1>
@@ -806,9 +867,7 @@ function Dashboard() {
               onClick={() => refetch()}
               className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted transition-all active:scale-95"
             >
-              <RefreshCw
-                className={`h-4 w-4 text-primary ${isFetching ? "animate-spin" : ""}`}
-              />
+              <RefreshCw className={`h-4 w-4 text-primary ${isFetching ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">รีเฟรชบิล</span>
             </button>
             <button
@@ -865,7 +924,11 @@ function Dashboard() {
             />
             <StatCard
               label="ความคืบหน้าการชำระ"
-              value={isLoading && !localBills ? "—" : `${resolvedData?.totals.paid ?? 0} / ${resolvedData?.totals.activeBills ?? 0}`}
+              value={
+                isLoading && !localBills
+                  ? "—"
+                  : `${resolvedData?.totals.paid ?? 0} / ${resolvedData?.totals.activeBills ?? 0}`
+              }
               subtext={`${isLoading && !localBills ? "—" : Math.round(((resolvedData?.totals.paid ?? 0) / (resolvedData?.totals.activeBills ?? 1)) * 100)}% จ่ายแล้ว`}
               icon={<CheckCircle2 className="h-5 w-5" />}
               tone="success"
@@ -876,9 +939,11 @@ function Dashboard() {
           <div className="rounded-2xl glass-card-premium p-5 flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <h3 className="font-display font-semibold text-sm">สัดส่วนกระแสเงินสดสะสม</h3>
-              <span className="text-[10px] bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">เรียลไทม์</span>
+              <span className="text-[10px] bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">
+                เรียลไทม์
+              </span>
             </div>
-            
+
             <div className="h-44 w-full relative flex items-center justify-center mt-2">
               {isLoading && !localBills ? (
                 <div className="h-28 w-28 rounded-full border-4 border-dashed border-muted animate-spin" />
@@ -903,7 +968,9 @@ function Dashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute flex flex-col items-center">
-                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">ยอดคงเหลือ</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">
+                      ยอดคงเหลือ
+                    </span>
                     <span className="text-xl font-bold font-display text-warning">
                       {baht(resolvedData?.totals.outstanding ?? 0)}
                     </span>
@@ -984,11 +1051,17 @@ function Dashboard() {
                   <Info className="h-3.5 w-3.5 text-primary" />
                   <span>
                     {resolvedData?.provider === "supabase" ? (
-                      <>เชื่อมต่อตรงกับฐานข้อมูล <b>Supabase Cloud</b> แบบ Real-time</>
+                      <>
+                        เชื่อมต่อตรงกับฐานข้อมูล <b>Supabase Cloud</b> แบบ Real-time
+                      </>
                     ) : resolvedData?.provider === "sheets" ? (
-                      <>ซิงก์จาก Google Sheets <b>spayleter</b> (แก้ไขสถานะได้ในหนึ่งคลิก)</>
+                      <>
+                        ซิงก์จาก Google Sheets <b>spayleter</b> (แก้ไขสถานะได้ในหนึ่งคลิก)
+                      </>
                     ) : (
-                      <>รันบนจำลองระบบฐานข้อมูล <b>Simulator DB</b> ชั่วคราว</>
+                      <>
+                        รันบนจำลองระบบฐานข้อมูล <b>Simulator DB</b> ชั่วคราว
+                      </>
                     )}
                   </span>
                 </p>
@@ -1010,9 +1083,9 @@ function Dashboard() {
                 </div>
               ) : (
                 filtered.map((g) => (
-                  <CustomerCard 
-                    key={g.lineUserId || g.customer} 
-                    group={g} 
+                  <CustomerCard
+                    key={g.lineUserId || g.customer}
+                    group={g}
                     onOpenLinePreview={handleOpenLinePreview}
                     onManualToggleStatus={onManualToggleStatus}
                     onOpenEditModal={handleOpenEditModal}
@@ -1037,7 +1110,9 @@ function Dashboard() {
                 onClick={() => refetchLogs()}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium hover:bg-muted transition-all active:scale-95"
               >
-                <RefreshCw className={`h-3 w-3 text-primary ${isLogsFetching ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`h-3 w-3 text-primary ${isLogsFetching ? "animate-spin" : ""}`}
+                />
                 <span>โหลดใหม่</span>
               </button>
             </div>
@@ -1051,7 +1126,9 @@ function Dashboard() {
               <div className="p-12 text-center text-muted-foreground border-dashed border border-border m-4 rounded-xl">
                 <AlertCircle className="h-8 w-8 mx-auto text-muted-foreground/60 mb-2" />
                 <p className="text-xs font-semibold">ยังไม่มีประวัติล็อกการชำระเงินในฐานข้อมูล</p>
-                <p className="text-[10px] text-muted-foreground mt-1">ประวัติจะปรากฏขึ้นที่นี่เมื่อมีลูกค้ากดแนบสลิปผ่านทางหน้าบิลส่วนตัว</p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  ประวัติจะปรากฏขึ้นที่นี่เมื่อมีลูกค้ากดแนบสลิปผ่านทางหน้าบิลส่วนตัว
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -1080,13 +1157,17 @@ function Dashboard() {
                             {new Date(log.createdAt).toLocaleTimeString("th-TH", {
                               hour: "2-digit",
                               minute: "2-digit",
-                              second: "2-digit"
+                              second: "2-digit",
                             })}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="font-semibold text-foreground block">{log.customerName}</span>
-                          <span className="text-[10px] text-muted-foreground block mt-0.5">{log.itemName}</span>
+                          <span className="font-semibold text-foreground block">
+                            {log.customerName}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground block mt-0.5">
+                            {log.itemName}
+                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="font-display font-bold text-success text-sm flex items-center gap-1">
@@ -1097,12 +1178,18 @@ function Dashboard() {
                           <div className="space-y-1 max-w-xs">
                             {log.sender && (
                               <p className="text-[10px] text-foreground font-medium">
-                                โอนโดย: <span className="text-muted-foreground font-normal">{log.sender}</span>
+                                โอนโดย:{" "}
+                                <span className="text-muted-foreground font-normal">
+                                  {log.sender}
+                                </span>
                               </p>
                             )}
                             {log.transRef && (
                               <p className="text-[10px] text-foreground font-mono">
-                                Ref: <span className="text-muted-foreground font-normal">{log.transRef}</span>
+                                Ref:{" "}
+                                <span className="text-muted-foreground font-normal">
+                                  {log.transRef}
+                                </span>
                               </p>
                             )}
                             {log.slipDate && (
@@ -1121,19 +1208,27 @@ function Dashboard() {
                                 <ExternalLink className="h-3 w-3" />
                               </a>
                             ) : (
-                              <span className="text-[9px] text-muted-foreground/60">ไม่มีไฟล์รูปแนบ</span>
+                              <span className="text-[9px] text-muted-foreground/60">
+                                ไม่มีไฟล์รูปแนบ
+                              </span>
                             )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                            /ชำระแล้ว|paid|จ่ายแล้ว/i.test(log.status)
-                              ? "bg-success/10 text-success border border-success/20"
-                              : "bg-warning/10 text-warning border border-warning/20"
-                          }`}>
-                            <span className={`h-1 w-1 rounded-full ${
-                              /ชำระแล้ว|paid|จ่ายแล้ว/i.test(log.status) ? "bg-success" : "bg-warning"
-                            }`} />
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                              /ชำระแล้ว|paid|จ่ายแล้ว/i.test(log.status)
+                                ? "bg-success/10 text-success border border-success/20"
+                                : "bg-warning/10 text-warning border border-warning/20"
+                            }`}
+                          >
+                            <span
+                              className={`h-1 w-1 rounded-full ${
+                                /ชำระแล้ว|paid|จ่ายแล้ว/i.test(log.status)
+                                  ? "bg-success"
+                                  : "bg-warning"
+                              }`}
+                            />
                             {log.status}
                           </span>
                         </td>
@@ -1152,7 +1247,8 @@ function Dashboard() {
             Smart Bill Hub v1.2 · พัฒนาต่อยอดด้วย AI (Gemini Flash 2.5) & React.js
           </p>
           <p className="text-[10px] text-muted-foreground/60 max-w-md mx-auto">
-            เชื่อมต่อกับบัญชี Google Sheets ผ่าน Lovable Connector-Gateway และเชื่อมต่อ LINE Messaging API ผ่าน Push Bot
+            เชื่อมต่อกับบัญชี Google Sheets ผ่าน Lovable Connector-Gateway และเชื่อมต่อ LINE
+            Messaging API ผ่าน Push Bot
           </p>
         </footer>
       </main>
@@ -1171,7 +1267,7 @@ function Dashboard() {
                 </span>
                 <span className="text-[10px] font-mono opacity-60">LTE</span>
               </div>
-              
+
               {/* Phone Chat Body */}
               <div className="flex-1 overflow-y-auto py-4 space-y-4 font-sans text-xs flex flex-col min-h-[160px] md:min-h-0">
                 <div className="flex gap-2 items-start">
@@ -1195,8 +1291,10 @@ function Dashboard() {
             <div className="flex-1 p-6 flex flex-col min-h-0 justify-between">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-display font-bold text-lg text-foreground">แต่งข้อความแจ้งหนี้</h3>
-                  <button 
+                  <h3 className="font-display font-bold text-lg text-foreground">
+                    แต่งข้อความแจ้งหนี้
+                  </h3>
+                  <button
                     onClick={() => setIsLinePreviewOpen(false)}
                     className="p-1 hover:bg-muted rounded-full transition-colors"
                   >
@@ -1204,9 +1302,13 @@ function Dashboard() {
                   </button>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-primary mb-1">ส่งถึง: {selectedGroupForLine.customer}</p>
+                  <p className="text-xs font-semibold text-primary mb-1">
+                    ส่งถึง: {selectedGroupForLine.customer}
+                  </p>
                   {selectedGroupForLine.lineUserId ? (
-                    <p className="text-[10px] font-mono text-muted-foreground truncate">UID: {selectedGroupForLine.lineUserId}</p>
+                    <p className="text-[10px] font-mono text-muted-foreground truncate">
+                      UID: {selectedGroupForLine.lineUserId}
+                    </p>
                   ) : (
                     <span className="text-[10px] text-destructive-foreground bg-destructive/15 px-2 py-0.5 rounded-md font-medium">
                       ⚠️ ลูกค้าท่านนี้ไม่มี LINE ID (กดคัดลอกส่งแทนได้)
@@ -1215,7 +1317,9 @@ function Dashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-muted-foreground">ข้อความทวงถาม</label>
+                  <label className="text-xs font-semibold text-muted-foreground">
+                    ข้อความทวงถาม
+                  </label>
                   <textarea
                     value={customLineMessage}
                     onChange={(e) => setCustomMessage(e.target.value)}
@@ -1271,33 +1375,40 @@ function Dashboard() {
       {isScannerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-card w-full max-w-3xl rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] md:max-h-[580px] animate-scale-up">
-            
             {/* Left Column: Drag & Drop/Preview */}
             <div className="w-full md:w-[320px] bg-muted/30 p-6 flex flex-col shrink-0 border-b md:border-b-0 md:border-r border-border/60">
               <div className="flex-1 flex flex-col items-center justify-center">
                 {slipPreview ? (
                   <div className="relative w-full max-h-[220px] md:max-h-[360px] rounded-2xl overflow-hidden border border-border bg-black/10 flex items-center justify-center shadow-inner">
-                    <img src={slipPreview} alt="Slip" className="object-contain w-full h-full max-h-[300px]" />
+                    <img
+                      src={slipPreview}
+                      alt="Slip"
+                      className="object-contain w-full h-full max-h-[300px]"
+                    />
                     {isScanning && (
                       <div className="absolute inset-0 bg-success/10 backdrop-blur-[1px] flex flex-col items-center justify-center">
                         {/* Laser line effect */}
                         <div className="absolute left-0 right-0 h-1 bg-success shadow-[0_0_12px_2px_var(--success)] animate-scan" />
                         <div className="p-3 bg-black/70 rounded-2xl flex flex-col items-center gap-2 border border-success/30">
                           <Loader2 className="h-6 w-6 text-success animate-spin" />
-                          <span className="text-[11px] font-semibold text-white">AI กำลังประมวลผล...</span>
+                          <span className="text-[11px] font-semibold text-white">
+                            AI กำลังประมวลผล...
+                          </span>
                         </div>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div 
+                  <div
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full h-[220px] md:h-full min-h-[180px] border-2 border-dashed border-primary/30 hover:border-primary/70 bg-card rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all active:scale-98 shadow-sm group"
                   >
                     <div className="h-12 w-12 rounded-full bg-primary/10 grid place-items-center text-primary group-hover:scale-110 transition-transform mb-4">
                       <Upload className="h-6 w-6" />
                     </div>
-                    <span className="text-sm font-semibold text-foreground">อัปโหลดสลิปโอนเงิน</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      อัปโหลดสลิปโอนเงิน
+                    </span>
                     <span className="text-xs text-muted-foreground mt-2 max-w-[200px]">
                       ลากไฟล์รูปภาพสลิปมาวาง หรือ คลิกเพื่อเลือกรูปภาพจากเครื่อง
                     </span>
@@ -1343,7 +1454,7 @@ function Dashboard() {
                     <Sparkles className="h-5 w-5 text-primary" />
                     วิเคราะห์ตรวจสลิปด้วย AI
                   </h3>
-                  <button 
+                  <button
                     onClick={() => setIsScannerOpen(false)}
                     className="p-1 hover:bg-muted rounded-full transition-colors"
                   >
@@ -1354,13 +1465,15 @@ function Dashboard() {
                 {!slipPreview ? (
                   <div className="h-64 grid place-items-center text-center">
                     <p className="text-xs text-muted-foreground max-w-sm">
-                      กรุณาทำการเลือกอัปโหลดรูปภาพสลิปที่คอลัมน์ซ้ายมือก่อน เพื่อให้ระบบ AI ทำการตรวจและประมวลผลข้อมูลสลิป
+                      กรุณาทำการเลือกอัปโหลดรูปภาพสลิปที่คอลัมน์ซ้ายมือก่อน เพื่อให้ระบบ AI
+                      ทำการตรวจและประมวลผลข้อมูลสลิป
                     </p>
                   </div>
                 ) : !scannedDetails ? (
                   <div className="h-64 flex flex-col items-center justify-center text-center space-y-4">
                     <p className="text-xs text-muted-foreground max-w-sm">
-                      รูปภาพพร้อมวิเคราะห์แล้ว กดปุ่ม "เริ่มต้นสแกนด้วย AI" ด้านล่างเพื่อส่งข้อมูลให้ปัญญาประดิษฐ์ประมวลผลค่า
+                      รูปภาพพร้อมวิเคราะห์แล้ว กดปุ่ม "เริ่มต้นสแกนด้วย AI"
+                      ด้านล่างเพื่อส่งข้อมูลให้ปัญญาประดิษฐ์ประมวลผลค่า
                     </p>
                     <button
                       onClick={handleScanSlip}
@@ -1376,39 +1489,67 @@ function Dashboard() {
                     {/* Extracted Details card */}
                     <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">ผลการตรวจสอบสลิป</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                          ผลการตรวจสอบสลิป
+                        </span>
                         {scannedDetails.isValid ? (
-                          <span className="text-[10px] font-bold bg-success/15 text-success px-2 py-0.5 rounded-full">✓ สลิปถูกต้อง</span>
+                          <span className="text-[10px] font-bold bg-success/15 text-success px-2 py-0.5 rounded-full">
+                            ✓ สลิปถูกต้อง
+                          </span>
                         ) : (
-                          <span className="text-[10px] font-bold bg-destructive/15 text-destructive px-2 py-0.5 rounded-full">⚠️ ผิดพลาด/ไม่ระบุ</span>
+                          <span className="text-[10px] font-bold bg-destructive/15 text-destructive px-2 py-0.5 rounded-full">
+                            ⚠️ ผิดพลาด/ไม่ระบุ
+                          </span>
                         )}
                       </div>
 
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs font-sans">
                         <div>
-                          <span className="text-muted-foreground text-[10px] block">ธนาคารปลายทาง</span>
-                          <span className="font-semibold text-foreground truncate block">{scannedDetails.bank}</span>
+                          <span className="text-muted-foreground text-[10px] block">
+                            ธนาคารปลายทาง
+                          </span>
+                          <span className="font-semibold text-foreground truncate block">
+                            {scannedDetails.bank}
+                          </span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground text-[10px] block">ยอดโอนเงินจริง</span>
-                          <span className="font-bold text-success text-sm block">{baht(scannedDetails.amount)}</span>
+                          <span className="text-muted-foreground text-[10px] block">
+                            ยอดโอนเงินจริง
+                          </span>
+                          <span className="font-bold text-success text-sm block">
+                            {baht(scannedDetails.amount)}
+                          </span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground text-[10px] block">ผู้โอนเงิน (ลูกค้า)</span>
-                          <span className="font-semibold text-foreground truncate block">{scannedDetails.sender}</span>
+                          <span className="text-muted-foreground text-[10px] block">
+                            ผู้โอนเงิน (ลูกค้า)
+                          </span>
+                          <span className="font-semibold text-foreground truncate block">
+                            {scannedDetails.sender}
+                          </span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground text-[10px] block">รหัสอ้างอิงธุรกรรม</span>
-                          <span className="font-mono text-[10px] text-foreground truncate block">{scannedDetails.transactionId}</span>
+                          <span className="text-muted-foreground text-[10px] block">
+                            รหัสอ้างอิงธุรกรรม
+                          </span>
+                          <span className="font-mono text-[10px] text-foreground truncate block">
+                            {scannedDetails.transactionId}
+                          </span>
                         </div>
                         <div className="col-span-2 flex items-center gap-4 border-t border-border/40 pt-2">
                           <div>
-                            <span className="text-muted-foreground text-[10px] block">วันที่ทำรายการ</span>
-                            <span className="font-semibold text-foreground block">{scannedDetails.date}</span>
+                            <span className="text-muted-foreground text-[10px] block">
+                              วันที่ทำรายการ
+                            </span>
+                            <span className="font-semibold text-foreground block">
+                              {scannedDetails.date}
+                            </span>
                           </div>
                           <div>
                             <span className="text-muted-foreground text-[10px] block">เวลาโอน</span>
-                            <span className="font-semibold text-foreground block">{scannedDetails.time}</span>
+                            <span className="font-semibold text-foreground block">
+                              {scannedDetails.time}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -1419,11 +1560,13 @@ function Dashboard() {
                       <label className="text-xs font-bold text-primary block flex items-center gap-1">
                         <span>🎯 บันทึกผลลัพธ์นี้ลงในรายการบิลของ:</span>
                       </label>
-                      
+
                       <div className="relative">
                         <select
                           value={selectedMatchRowIndex ?? ""}
-                          onChange={(e) => setSelectedMatchRowIndex(e.target.value ? Number(e.target.value) : null)}
+                          onChange={(e) =>
+                            setSelectedMatchRowIndex(e.target.value ? Number(e.target.value) : null)
+                          }
                           className="w-full text-xs font-sans p-3 pr-8 bg-card border border-border rounded-xl appearance-none outline-none focus:ring-2 focus:ring-primary/40"
                         >
                           <option value="">-- กรุณาเลือกบิลเพื่อทำการจับคู่ชำระ --</option>
@@ -1431,7 +1574,8 @@ function Dashboard() {
                             .filter((r) => !/ชำระ|paid|จ่าย/i.test(r.status))
                             .map((r) => (
                               <option key={r.rowIndex} value={r.rowIndex}>
-                                {r.customer} · {r.item} (งวด {r.currentPeriod}/{r.totalPeriods} - {baht(r.installment)})
+                                {r.customer} · {r.item} (งวด {r.currentPeriod}/{r.totalPeriods} -{" "}
+                                {baht(r.installment)})
                               </option>
                             ))}
                         </select>
@@ -1473,7 +1617,6 @@ function Dashboard() {
                 </div>
               )}
             </div>
-
           </div>
         </div>
       )}
@@ -1488,11 +1631,15 @@ function Dashboard() {
                   <Pencil className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base text-foreground">แก้ไขรายละเอียดสัญญา</h3>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">คุณ {selectedRowToEdit.customer} · {selectedRowToEdit.item}</p>
+                  <h3 className="font-display font-bold text-base text-foreground">
+                    แก้ไขรายละเอียดสัญญา
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    คุณ {selectedRowToEdit.customer} · {selectedRowToEdit.item}
+                  </p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setIsEditModalOpen(false);
                   setSelectedRowToEdit(null);
@@ -1515,7 +1662,9 @@ function Dashboard() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-muted-foreground">กำหนดชำระ (วันของเดือน)</label>
+                  <label className="font-semibold text-muted-foreground">
+                    กำหนดชำระ (วันของเดือน)
+                  </label>
                   <input
                     type="text"
                     value={editDueDate}
@@ -1548,14 +1697,18 @@ function Dashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-muted-foreground">ค่าปรับล่าช้า (บาท/วัน)</label>
+                <label className="font-semibold text-muted-foreground">
+                  ค่าปรับล่าช้า (บาท/วัน)
+                </label>
                 <input
                   type="number"
                   value={editLateFeeRate}
                   onChange={(e) => setEditLateFeeRate(Number(e.target.value))}
                   className="w-full p-3 bg-muted/40 border border-border rounded-xl focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none font-semibold text-foreground"
                 />
-                <p className="text-[10px] text-muted-foreground">อัตราค่าปรับสะสมต่อวันที่เกินวันครบกำหนดชำระ</p>
+                <p className="text-[10px] text-muted-foreground">
+                  อัตราค่าปรับสะสมต่อวันที่เกินวันครบกำหนดชำระ
+                </p>
               </div>
             </div>
 
@@ -1604,11 +1757,15 @@ function Dashboard() {
                   <Plus className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base text-foreground">สร้างใบกำกับผ่อนสินค้าใหม่</h3>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">เพิ่มบิลเรียกเก็บเงินใหม่เข้าระบบบอร์ดทวงเงิน</p>
+                  <h3 className="font-display font-bold text-base text-foreground">
+                    สร้างใบกำกับผ่อนสินค้าใหม่
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    เพิ่มบิลเรียกเก็บเงินใหม่เข้าระบบบอร์ดทวงเงิน
+                  </p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setIsCreateModalOpen(false)}
                 className="p-1.5 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground"
               >
@@ -1619,7 +1776,9 @@ function Dashboard() {
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-muted-foreground">ชื่อลูกค้า <span className="text-destructive">*</span></label>
+                  <label className="font-semibold text-muted-foreground">
+                    ชื่อลูกค้า <span className="text-destructive">*</span>
+                  </label>
                   <input
                     type="text"
                     value={newCustomerName}
@@ -1629,7 +1788,9 @@ function Dashboard() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-muted-foreground">เลขที่สัญญา / บิล (ถ้ามี)</label>
+                  <label className="font-semibold text-muted-foreground">
+                    เลขที่สัญญา / บิล (ถ้ามี)
+                  </label>
                   <input
                     type="text"
                     value={newCustomerNo}
@@ -1641,7 +1802,9 @@ function Dashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-muted-foreground">รายการสินค้าที่ผ่อนชำระ <span className="text-destructive">*</span></label>
+                <label className="font-semibold text-muted-foreground">
+                  รายการสินค้าที่ผ่อนชำระ <span className="text-destructive">*</span>
+                </label>
                 <input
                   type="text"
                   value={newItemName}
@@ -1653,7 +1816,9 @@ function Dashboard() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-muted-foreground">ราคาเต็มทั้งหมด (บาท) <span className="text-destructive">*</span></label>
+                  <label className="font-semibold text-muted-foreground">
+                    ราคาเต็มทั้งหมด (บาท) <span className="text-destructive">*</span>
+                  </label>
                   <input
                     type="number"
                     value={newFullPrice || ""}
@@ -1663,7 +1828,9 @@ function Dashboard() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-muted-foreground">ยอดผ่อนต่องวด (บาท) <span className="text-destructive">*</span></label>
+                  <label className="font-semibold text-muted-foreground">
+                    ยอดผ่อนต่องวด (บาท) <span className="text-destructive">*</span>
+                  </label>
                   <input
                     type="number"
                     value={newInstallment || ""}
@@ -1697,7 +1864,9 @@ function Dashboard() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-muted-foreground">กำหนดชำระ (วันของเดือน)</label>
+                  <label className="font-semibold text-muted-foreground">
+                    กำหนดชำระ (วันของเดือน)
+                  </label>
                   <input
                     type="text"
                     value={newDueDate}
@@ -1707,7 +1876,9 @@ function Dashboard() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-muted-foreground">ค่าปรับล่าช้า (บาท/วัน)</label>
+                  <label className="font-semibold text-muted-foreground">
+                    ค่าปรับล่าช้า (บาท/วัน)
+                  </label>
                   <input
                     type="number"
                     value={newLateFeeRate}
@@ -1718,7 +1889,9 @@ function Dashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-muted-foreground">LINE User ID (ถ้ามี - สำหรับยิงแจ้งหนี้ตรงเข้าแอป)</label>
+                <label className="font-semibold text-muted-foreground">
+                  LINE User ID (ถ้ามี - สำหรับยิงแจ้งหนี้ตรงเข้าแอป)
+                </label>
                 <input
                   type="text"
                   value={newLineUserId}
@@ -1791,13 +1964,17 @@ function StatCard({
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
             {label}
           </p>
-          <p className="font-display text-2xl font-bold mt-1 text-foreground leading-none">{value}</p>
+          <p className="font-display text-2xl font-bold mt-1 text-foreground leading-none">
+            {value}
+          </p>
         </div>
         <div className={`h-9 w-9 rounded-xl grid place-items-center ${toneClass} shrink-0`}>
           {icon}
         </div>
       </div>
-      <p className="text-[10px] text-muted-foreground mt-2 truncate border-t border-border/30 pt-1.5">{subtext}</p>
+      <p className="text-[10px] text-muted-foreground mt-2 truncate border-t border-border/30 pt-1.5">
+        {subtext}
+      </p>
     </div>
   );
 }
@@ -1827,7 +2004,9 @@ function CustomerCard({
             {group.customer.replace(/[^\u0E00-\u0E7Fa-zA-Z]/g, "").slice(0, 1) || "?"}
           </div>
           <div className="min-w-0">
-            <h3 className="font-display font-semibold truncate text-foreground">{group.customer}</h3>
+            <h3 className="font-display font-semibold truncate text-foreground">
+              {group.customer}
+            </h3>
             <p className="text-[10px] text-muted-foreground font-mono truncate bg-muted/60 px-2 py-0.5 rounded mt-1 inline-block">
               {group.lineUserId || "ไม่มี LINE UID"}
             </p>
@@ -1885,7 +2064,10 @@ function CustomerCard({
               const isLoadingRow = updatingRowId === row.rowIndex;
 
               return (
-                <tr key={row.rowIndex} className="border-t border-border/40 hover:bg-muted/15 transition-colors">
+                <tr
+                  key={row.rowIndex}
+                  className="border-t border-border/40 hover:bg-muted/15 transition-colors"
+                >
                   <td className="px-6 py-3 font-medium text-foreground">{row.item}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
                     {baht(row.fullPrice)}
@@ -1916,7 +2098,9 @@ function CustomerCard({
                           }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono text-muted-foreground leading-none">{pct}%</span>
+                      <span className="text-[10px] font-mono text-muted-foreground leading-none">
+                        {pct}%
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center">
@@ -1969,4 +2153,3 @@ function CustomerCard({
 }
 
 type Trash2 = typeof X;
-

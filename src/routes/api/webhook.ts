@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 
-const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || "1uHZZeh1epL2656CQrCJ4QsSQDDJ5TNQ42jpiXaXvCac";
+const SPREADSHEET_ID =
+  process.env.GOOGLE_SHEET_ID || "1uHZZeh1epL2656CQrCJ4QsSQDDJ5TNQ42jpiXaXvCac";
 const SHEET_NAME = "spayleter";
 
 // Helper for Service Account auth with dynamic ignored imports
@@ -59,7 +60,9 @@ export const Route = createFileRoute("/api/webhook")({
                 if (profileRes.ok) {
                   const profile = await profileRes.json();
                   displayName = profile.displayName || "ลูกค้าใหม่";
-                  console.log(`Webhook resolved LINE display name: ${displayName} for UID: ${userId}`);
+                  console.log(
+                    `Webhook resolved LINE display name: ${displayName} for UID: ${userId}`,
+                  );
                 }
               } catch (profileError) {
                 console.error("Failed to fetch LINE profile:", profileError);
@@ -80,13 +83,15 @@ export const Route = createFileRoute("/api/webhook")({
                     (c.customer_name &&
                       (c.customer_name.toLowerCase().trim() === displayName.toLowerCase().trim() ||
                         c.customer_name.toLowerCase().includes(displayName.toLowerCase()) ||
-                        displayName.toLowerCase().includes(c.customer_name.toLowerCase())))
+                        displayName.toLowerCase().includes(c.customer_name.toLowerCase()))),
                 );
 
                 if (matchedDbCust) {
                   matchedCustomer = matchedDbCust.customer_name;
                   if (matchedDbCust.line_uid !== userId) {
-                    console.log(`🔗 Supabase Auto-Mapping: พบชื่อลูกค้า "${matchedDbCust.customer_name}" ที่ตรงกัน! กำลังผูก LINE UID: ${userId} โดยอัตโนมัติ`);
+                    console.log(
+                      `🔗 Supabase Auto-Mapping: พบชื่อลูกค้า "${matchedDbCust.customer_name}" ที่ตรงกัน! กำลังผูก LINE UID: ${userId} โดยอัตโนมัติ`,
+                    );
                     const { error: updateError } = await client
                       .from("customers")
                       .update({ line_uid: userId })
@@ -140,7 +145,9 @@ export const Route = createFileRoute("/api/webhook")({
                 }
 
                 if (matchedRowIndex) {
-                  console.log(`🔗 Sheets Auto-Mapping: พบแถวลูกค้าแถวที่ ${matchedRowIndex} ใน Sheets! กำลังเขียน LINE UID`);
+                  console.log(
+                    `🔗 Sheets Auto-Mapping: พบแถวลูกค้าแถวที่ ${matchedRowIndex} ใน Sheets! กำลังเขียน LINE UID`,
+                  );
                   await sheets.spreadsheets.values.update({
                     spreadsheetId: SPREADSHEET_ID,
                     range: `${SHEET_NAME}!C${matchedRowIndex}`,
@@ -149,16 +156,22 @@ export const Route = createFileRoute("/api/webhook")({
                     requestBody: {
                       values: [[userId]],
                     },
-                  } as any);
+                  });
                 } else {
                   console.log(`ℹ️ ไม่พบรายชื่อตรงกันโดยตรงใน Sheets สำหรับคุณ ${displayName}`);
                 }
               } catch (sheetError) {
-                console.error("🚨 ระบบค้นหาและผูก UID อัตโนมัติบน Google Sheets ขัดข้อง:", sheetError);
+                console.error(
+                  "🚨 ระบบค้นหาและผูก UID อัตโนมัติบน Google Sheets ขัดข้อง:",
+                  sheetError,
+                );
               }
 
               // 4. Send Premium LINE Flex Message with billing link
-              const baseUrl = process.env.APP_BASE_URL || "https://your-project.vercel.app";
+              const baseUrl =
+                process.env.APP_BASE_URL ||
+                process.env.VITE_APP_BASE_URL ||
+                "https://your-project.vercel.app";
               const billLink = `${baseUrl}/bill?uid=${userId}`;
 
               const flexContents = {

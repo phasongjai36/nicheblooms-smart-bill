@@ -12,7 +12,11 @@ const ItemSchema = z.object({
 });
 
 const InputSchema = z.object({
-  lineUserId: z.string().min(10).max(64).regex(/^U[0-9a-f]{32}$/i, "LINE UID ไม่ถูกต้อง"),
+  lineUserId: z
+    .string()
+    .min(10)
+    .max(64)
+    .regex(/^U[0-9a-f]{32}$/i, "LINE UID ไม่ถูกต้อง"),
   customer: z.string().min(1).max(120),
   totalInstallment: z.number().nonnegative(),
   totalRemaining: z.number().nonnegative(),
@@ -44,7 +48,7 @@ function buildMessage(data: z.infer<typeof InputSchema>) {
 }
 
 export const sendLineNotification = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => InputSchema.parse(input))
+  .validator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
     const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
     if (!token) {
