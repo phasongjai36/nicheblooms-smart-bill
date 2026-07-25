@@ -1,4 +1,5 @@
 {
+  "name": "nicheblooms-smart-bill",
   "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
   "framework": "vite",
