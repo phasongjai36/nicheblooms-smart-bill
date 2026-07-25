@@ -105,8 +105,16 @@ export const BotanicalDecor: React.FC<BotanicalDecorProps> = ({
           <path d="M102 42C108 38 108 30 105 25C102 32 100 36 102 42" />
           <path d="M90 25C94 18 92 10 88 6C86 14 86 18 90 25" />
           {/* ลายริบบิ้นมินิมอลผูกตรงฐาน */}
-          <path d="M60 110C56 112 54 116 56 120C58 116 62 112 60 110Z" fill="currentColor" className="opacity-10" />
-          <path d="M60 110C64 112 66 116 64 120C62 116 58 112 60 110Z" fill="currentColor" className="opacity-10" />
+          <path
+            d="M60 110C56 112 54 116 56 120C58 116 62 112 60 110Z"
+            fill="currentColor"
+            className="opacity-10"
+          />
+          <path
+            d="M60 110C64 112 66 116 64 120C62 116 58 112 60 110Z"
+            fill="currentColor"
+            className="opacity-10"
+          />
         </svg>
       );
 

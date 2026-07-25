@@ -1,9 +1,8 @@
 {
   "name": "nicheblooms-smart-bill",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/client",
+  "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "npm install",
-  "devCommand": "npm run dev",
-  "regions": ["hkg1"]
+  "devCommand": "npm run dev"
 }

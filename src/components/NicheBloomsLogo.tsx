@@ -100,12 +100,25 @@ export function NicheBloomsLogo({
           <line x1="126" y1="33" x2="124" y2="32" stroke={strokeColor} strokeWidth="0.8" />
 
           {/* Mid-left twin leaves */}
-          <path d="M 114 46 Q 108 45 110 41 Q 115 42 114 46 Z" fill={strokeColor} className="opacity-90" />
-          <path d="M 113 56 Q 107 58 108 62 Q 113 60 113 56 Z" fill={strokeColor} className="opacity-90" />
+          <path
+            d="M 114 46 Q 108 45 110 41 Q 115 42 114 46 Z"
+            fill={strokeColor}
+            className="opacity-90"
+          />
+          <path
+            d="M 113 56 Q 107 58 108 62 Q 113 60 113 56 Z"
+            fill={strokeColor}
+            className="opacity-90"
+          />
 
           {/* Bottom-left flower node */}
           <circle cx="122" cy="68" r="1.5" fill={strokeColor} />
-          <path d="M 122 68 Q 120 74 126 73 Q 125 69 122 68 Z" stroke={strokeColor} strokeWidth="0.8" fill="none" />
+          <path
+            d="M 122 68 Q 120 74 126 73 Q 125 69 122 68 Z"
+            stroke={strokeColor}
+            strokeWidth="0.8"
+            fill="none"
+          />
 
           {/* Far bottom-left leaf */}
           <path d="M 132 78 Q 128 82 133 83 Q 135 79 132 78 Z" fill={strokeColor} />
@@ -116,12 +129,25 @@ export function NicheBloomsLogo({
           <line x1="154" y1="33" x2="156" y2="32" stroke={strokeColor} strokeWidth="0.8" />
 
           {/* Mid-right twin leaves */}
-          <path d="M 166 46 Q 172 45 170 41 Q 165 42 166 46 Z" fill={strokeColor} className="opacity-90" />
-          <path d="M 167 56 Q 173 58 172 62 Q 167 60 167 56 Z" fill={strokeColor} className="opacity-90" />
+          <path
+            d="M 166 46 Q 172 45 170 41 Q 165 42 166 46 Z"
+            fill={strokeColor}
+            className="opacity-90"
+          />
+          <path
+            d="M 167 56 Q 173 58 172 62 Q 167 60 167 56 Z"
+            fill={strokeColor}
+            className="opacity-90"
+          />
 
           {/* Bottom-right flower node */}
           <circle cx="158" cy="68" r="1.5" fill={strokeColor} />
-          <path d="M 158 68 Q 160 74 154 73 Q 155 69 158 68 Z" stroke={strokeColor} strokeWidth="0.8" fill="none" />
+          <path
+            d="M 158 68 Q 160 74 154 73 Q 155 69 158 68 Z"
+            stroke={strokeColor}
+            strokeWidth="0.8"
+            fill="none"
+          />
 
           {/* Far bottom-right leaf */}
           <path d="M 148 78 Q 152 82 147 83 Q 145 79 148 78 Z" fill={strokeColor} />

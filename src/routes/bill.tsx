@@ -19,7 +19,12 @@ import {
   ExternalLink,
   Trash2,
 } from "lucide-react";
-import { fetchBills, updateBillStatus, type CustomerGroup, type BillRow } from "@/lib/sheet.functions";
+import {
+  fetchBills,
+  updateBillStatus,
+  type CustomerGroup,
+  type BillRow,
+} from "@/lib/sheet.functions";
 import { scanSlipWithAi, type SlipDetails } from "@/lib/gemini.functions";
 import { uploadSlipToDrive } from "@/lib/drive.functions";
 import { toast, Toaster } from "sonner";
@@ -79,21 +84,21 @@ function CustomerBillPortal() {
   // Match the user group safely based on uid or customer name fallback
   const customerGroup = useMemo(() => {
     if (!data) return null;
-    
+
     // First, try matching by LINE UID
     if (uid) {
       const match = data.groups.find((g) => g.lineUserId?.toLowerCase() === uid.toLowerCase());
       if (match) return match;
     }
-    
+
     // Fallback: match by Customer Name
     if (searchCustomerName) {
       const match = data.groups.find(
-        (g) => g.customer.toLowerCase().trim() === searchCustomerName.trim().toLowerCase()
+        (g) => g.customer.toLowerCase().trim() === searchCustomerName.trim().toLowerCase(),
       );
       if (match) return match;
     }
-    
+
     return null;
   }, [data, uid, searchCustomerName]);
 
@@ -108,16 +113,16 @@ function CustomerBillPortal() {
   // Helper to calculate late days and late fee for a row
   const getLateFeeInfo = (row: BillRow) => {
     if (/ชำระ|paid|จ่าย/i.test(row.status)) return { lateDays: 0, lateFee: 0 };
-    
+
     const today = new Date();
     const currentDay = today.getDate();
-    
+
     let dueDay = 5;
     if (row.dueDate) {
       const match = row.dueDate.match(/\d+/);
       if (match) dueDay = parseInt(match[0], 10);
     }
-    
+
     if (currentDay > dueDay) {
       const lateDays = currentDay - dueDay;
       const rate = row.lateFeeRate !== undefined ? row.lateFeeRate : 50;
@@ -129,8 +134,7 @@ function CustomerBillPortal() {
   // Compute total late fee
   const totalLateFee = useMemo(() => {
     if (!customerGroup) return 0;
-    return customerGroup.items
-      .reduce((sum, row) => sum + getLateFeeInfo(row).lateFee, 0);
+    return customerGroup.items.reduce((sum, row) => sum + getLateFeeInfo(row).lateFee, 0);
   }, [customerGroup]);
 
   // Total amount to pay (Installment + Late Fee)
@@ -190,7 +194,9 @@ function CustomerBillPortal() {
 
       // We'll choose the bill row that closest matches the installment amount, or the first pending bill
       let targetBill = pendingBills[0];
-      const exactMatch = pendingBills.find((b) => Math.abs(b.installment - scannedDetails.amount) < 10);
+      const exactMatch = pendingBills.find(
+        (b) => Math.abs(b.installment - scannedDetails.amount) < 10,
+      );
       if (exactMatch) {
         targetBill = exactMatch;
       }
@@ -222,12 +228,18 @@ function CustomerBillPortal() {
           }
         } catch (uploadError) {
           console.error("Failed to upload slip to Google Drive:", uploadError);
-          toast.error("อัปโหลดสลิปล้มเหลว กำลังใช้การบันทึกสถานะแบบปกติค่ะ...", { id: "drive-upload" });
+          toast.error("อัปโหลดสลิปล้มเหลว กำลังใช้การบันทึกสถานะแบบปกติค่ะ...", {
+            id: "drive-upload",
+          });
         }
       }
 
       // Call sheet sync function with service account
-      const today = new Date().toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+      const today = new Date().toLocaleDateString("th-TH", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
       await updateStatusFn({
         data: {
           rowIndex: targetBill.rowIndex,
@@ -240,9 +252,11 @@ function CustomerBillPortal() {
         },
       });
 
-      toast.success(`แจ้งชำระบิล "${targetBill.item}" สำเร็จแล้วค่ะ! ระบบกำลังอัปเดตแผ่นงานของทางร้าน...`);
+      toast.success(
+        `แจ้งชำระบิล "${targetBill.item}" สำเร็จแล้วค่ะ! ระบบกำลังอัปเดตแผ่นงานของทางร้าน...`,
+      );
       queryClient.invalidateQueries({ queryKey: ["bills"] });
-      
+
       // Reset state
       setSlipFile(null);
       setSlipPreview(null);
@@ -274,15 +288,18 @@ function CustomerBillPortal() {
           <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-[var(--accent)]/5 blur-xl pointer-events-none" />
 
           <NicheBloomsLogo size="md" className="mx-auto opacity-95" />
-          
+
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)]">
             <AlertCircle className="h-8 w-8" />
           </div>
-          
+
           <div className="space-y-2">
-            <h1 className="font-display font-black text-xl tracking-tight text-[var(--primary)]">ไม่พบประวัติบิลส่วนตัวของคุณ</h1>
+            <h1 className="font-display font-black text-xl tracking-tight text-[var(--primary)]">
+              ไม่พบประวัติบิลส่วนตัวของคุณ
+            </h1>
             <p className="text-sm text-[var(--foreground)]/75 leading-relaxed">
-              ขออภัยอย่างยิ่งค่ะ ระบบไม่พบเอกสารบิลผ่อนชำระด้วยรหัสประจำตัวนี้ กรุณาติดต่อทางทีมงานนักการตลาดร้านดอกไม้เพื่อความถูกต้องนะคะ
+              ขออภัยอย่างยิ่งค่ะ ระบบไม่พบเอกสารบิลผ่อนชำระด้วยรหัสประจำตัวนี้
+              กรุณาติดต่อทางทีมงานนักการตลาดร้านดอกไม้เพื่อความถูกต้องนะคะ
             </p>
           </div>
 
@@ -308,7 +325,6 @@ function CustomerBillPortal() {
       {/* Glow Ornaments removed/hidden to perfectly showcase the premium textured watercolor background */}
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 relative z-10 space-y-6">
-        
         {/* NicheBlooms Centralized Brand Banner */}
         <div className="bg-white/60 backdrop-blur-md rounded-3xl p-6 border border-[var(--border)]/70 shadow-sm text-center relative overflow-hidden">
           {/* Botanical lines subtle decoration background */}
@@ -321,8 +337,10 @@ function CustomerBillPortal() {
         {/* Portal Header */}
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-6 pt-2">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl grid place-items-center text-white font-display font-extrabold text-lg shadow-lg relative overflow-hidden"
-                 style={{ background: "var(--gradient-brand)" }}>
+            <div
+              className="h-14 w-14 rounded-2xl grid place-items-center text-white font-display font-extrabold text-lg shadow-lg relative overflow-hidden"
+              style={{ background: "var(--gradient-brand)" }}
+            >
               {customerGroup.customer.replace(/[^\u0E00-\u0E7Fa-zA-Z]/g, "").slice(0, 1) || "?"}
             </div>
             <div>
@@ -339,13 +357,13 @@ function CustomerBillPortal() {
             </div>
           </div>
 
-          <button 
+          <button
             onClick={() => refetch()}
             disabled={isFetching}
             className="self-end sm:self-auto p-2.5 rounded-xl bg-white/70 border border-[var(--border)] hover:bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:text-[var(--primary)] transition-all active:scale-95 disabled:opacity-50 shadow-sm"
             title="ดึงข้อมูลล่าสุด"
           >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
           </button>
         </header>
 
@@ -353,21 +371,25 @@ function CustomerBillPortal() {
         <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-[var(--border)] p-6 shadow-xl flex flex-col justify-between">
             <div>
-              <span className="text-[10px] font-bold text-[var(--secondary-foreground)] uppercase tracking-widest block">ยอดค้างชำระเดือนนี้</span>
+              <span className="text-[10px] font-bold text-[var(--secondary-foreground)] uppercase tracking-widest block">
+                ยอดค้างชำระเดือนนี้
+              </span>
               <p className="font-display text-4xl font-black mt-2 text-[var(--primary)] tracking-tight">
                 {baht(pendingAmount)}
               </p>
             </div>
             <p className="text-[10px] text-[var(--secondary-foreground)]/80 mt-4 pt-3 border-t border-[var(--border)]">
-              {pendingAmount > 0 
-                ? "💡 กรุณาชำระยอดงวดปัจจุบันให้ครบถ้วนเพื่อผลประโยชน์และคะแนนเครดิตที่ดีของคุณค่ะ" 
+              {pendingAmount > 0
+                ? "💡 กรุณาชำระยอดงวดปัจจุบันให้ครบถ้วนเพื่อผลประโยชน์และคะแนนเครดิตที่ดีของคุณค่ะ"
                 : "🎉 คุณได้ทำการชำระยอดงวดปัจจุบันเรียบร้อยแล้ว ขอบพระคุณอย่างสูงค่ะ"}
             </p>
           </div>
 
           <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-[var(--border)] p-6 shadow-xl flex flex-col justify-between">
             <div>
-              <span className="text-[10px] font-bold text-[var(--secondary-foreground)] uppercase tracking-widest block">คงเหลือยอดปิดบัญชีทั้งหมด</span>
+              <span className="text-[10px] font-bold text-[var(--secondary-foreground)] uppercase tracking-widest block">
+                คงเหลือยอดปิดบัญชีทั้งหมด
+              </span>
               <p className="font-display text-4xl font-black mt-2 text-[var(--secondary-foreground)] tracking-tight">
                 {baht(customerGroup.totalRemaining)}
               </p>
@@ -380,7 +402,6 @@ function CustomerBillPortal() {
 
         {/* Main Interface Columns */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
           {/* Left Block: Active Bills (7 Columns on desktop) */}
           <div className="lg:col-span-7 space-y-4">
             <h2 className="font-display font-extrabold text-base text-[var(--primary)] flex items-center gap-2">
@@ -390,16 +411,27 @@ function CustomerBillPortal() {
 
             <div className="space-y-4">
               {customerGroup.items.map((row, idx) => {
-                const pct = row.totalPeriods > 0 ? Math.min(100, Math.round((row.currentPeriod / row.totalPeriods) * 100)) : 0;
+                const pct =
+                  row.totalPeriods > 0
+                    ? Math.min(100, Math.round((row.currentPeriod / row.totalPeriods) * 100))
+                    : 0;
                 const paid = /ชำระ|paid|จ่าย/i.test(row.status);
 
                 return (
-                  <article key={idx} className="rounded-2xl bg-white/80 backdrop-blur-md border border-[var(--border)] p-5 shadow-lg space-y-4 hover:border-[var(--accent)]/40 transition-all">
+                  <article
+                    key={idx}
+                    className="rounded-2xl bg-white/80 backdrop-blur-md border border-[var(--border)] p-5 shadow-lg space-y-4 hover:border-[var(--accent)]/40 transition-all"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-display font-bold text-sm text-[var(--primary)]">{row.item}</h3>
+                        <h3 className="font-display font-bold text-sm text-[var(--primary)]">
+                          {row.item}
+                        </h3>
                         <p className="text-[10px] text-[var(--secondary-foreground)] mt-1 font-medium">
-                          งวดปัจจุบัน: <span className="font-semibold text-[var(--primary)] font-mono">{row.currentPeriod} / {row.totalPeriods}</span>
+                          งวดปัจจุบัน:{" "}
+                          <span className="font-semibold text-[var(--primary)] font-mono">
+                            {row.currentPeriod} / {row.totalPeriods}
+                          </span>
                         </p>
                       </div>
                       <div>
@@ -417,24 +449,40 @@ function CustomerBillPortal() {
 
                     <div className="grid grid-cols-2 gap-x-4 border-t border-b border-[var(--border)] py-3 text-xs">
                       <div>
-                        <span className="text-[var(--secondary-foreground)] text-[10px] block font-medium">ยอดที่ผ่อนต่องวด</span>
-                        <span className="font-bold text-[var(--primary)] text-sm">{baht(row.installment)}</span>
+                        <span className="text-[var(--secondary-foreground)] text-[10px] block font-medium">
+                          ยอดที่ผ่อนต่องวด
+                        </span>
+                        <span className="font-bold text-[var(--primary)] text-sm">
+                          {baht(row.installment)}
+                        </span>
                       </div>
                       <div>
-                        <span className="text-[var(--secondary-foreground)] text-[10px] block font-medium">ราคาเต็มสินค้า</span>
-                        <span className="font-semibold text-[var(--secondary-foreground)]/80 text-sm">{baht(row.fullPrice)}</span>
+                        <span className="text-[var(--secondary-foreground)] text-[10px] block font-medium">
+                          ราคาเต็มสินค้า
+                        </span>
+                        <span className="font-semibold text-[var(--secondary-foreground)]/80 text-sm">
+                          {baht(row.fullPrice)}
+                        </span>
                       </div>
                     </div>
 
                     {!paid && getLateFeeInfo(row).lateFee > 0 && (
                       <div className="bg-red-50 border border-red-200/50 rounded-xl p-3 flex justify-between items-center text-xs">
                         <div>
-                          <span className="font-bold text-red-700 block">ชำระล่าช้าเกิน {getLateFeeInfo(row).lateDays} วัน</span>
-                          <span className="text-[10px] text-[var(--secondary-foreground)]">กำหนดชำระภายในวันที่ {row.dueDate || "5"} ของเดือน</span>
+                          <span className="font-bold text-red-700 block">
+                            ชำระล่าช้าเกิน {getLateFeeInfo(row).lateDays} วัน
+                          </span>
+                          <span className="text-[10px] text-[var(--secondary-foreground)]">
+                            กำหนดชำระภายในวันที่ {row.dueDate || "5"} ของเดือน
+                          </span>
                         </div>
                         <div className="text-right">
-                          <span className="text-[10px] text-[var(--secondary-foreground)] block">ค่าปรับ ({row.lateFeeRate || 50}฿/วัน)</span>
-                          <span className="font-extrabold text-red-600">+{baht(getLateFeeInfo(row).lateFee)}</span>
+                          <span className="text-[10px] text-[var(--secondary-foreground)] block">
+                            ค่าปรับ ({row.lateFeeRate || 50}฿/วัน)
+                          </span>
+                          <span className="font-extrabold text-red-600">
+                            +{baht(getLateFeeInfo(row).lateFee)}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -460,19 +508,22 @@ function CustomerBillPortal() {
 
           {/* Right Block: Dynamic Payment & Slip upload (5 Columns on desktop) */}
           <div className="lg:col-span-5 space-y-6">
-            
             {/* Dynamic PromptPay QR */}
             {pendingAmount > 0 ? (
               <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-[var(--border)] p-6 shadow-xl space-y-5 text-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-[var(--accent)]/10 blur-xl pointer-events-none" />
-                
+
                 <div className="flex items-center justify-center gap-1.5">
                   <QrCode className="h-5 w-5 text-[var(--primary)]" />
-                  <span className="text-xs font-bold text-[var(--primary)] uppercase tracking-wider">สแกนจ่ายผ่านพร้อมเพย์</span>
+                  <span className="text-xs font-bold text-[var(--primary)] uppercase tracking-wider">
+                    สแกนจ่ายผ่านพร้อมเพย์
+                  </span>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-xs text-[var(--secondary-foreground)] font-medium">ยอดเงินสแกนจ่ายสุทธิงวดนี้</p>
+                  <p className="text-xs text-[var(--secondary-foreground)] font-medium">
+                    ยอดเงินสแกนจ่ายสุทธิงวดนี้
+                  </p>
                   <p className="font-display text-3xl font-black text-[var(--primary)] tracking-tight">
                     {baht(totalAmountToPay)}
                   </p>
@@ -500,7 +551,9 @@ function CustomerBillPortal() {
                 </div>
 
                 <div className="space-y-1 text-center">
-                  <p className="text-[10px] text-[var(--secondary-foreground)] font-mono">พร้อมเพย์ ID: {promptPayId}</p>
+                  <p className="text-[10px] text-[var(--secondary-foreground)] font-mono">
+                    พร้อมเพย์ ID: {promptPayId}
+                  </p>
                   <p className="text-[9px] text-[var(--primary)] font-semibold bg-[var(--primary)]/10 py-1 px-3 rounded-full inline-block border border-[var(--primary)]/10">
                     ✓ คิวอาร์โค้ดสร้างขึ้นตามยอดจริงอัตโนมัติ
                   </p>
@@ -511,9 +564,12 @@ function CustomerBillPortal() {
                 <div className="h-12 w-12 rounded-full bg-[var(--primary)]/10 grid place-items-center text-[var(--primary)] mx-auto">
                   <Check className="h-6 w-6" />
                 </div>
-                <h3 className="font-display font-extrabold text-sm text-[var(--primary)]">ชำระยอดงวดปัจจุบันเรียบร้อย</h3>
+                <h3 className="font-display font-extrabold text-sm text-[var(--primary)]">
+                  ชำระยอดงวดปัจจุบันเรียบร้อย
+                </h3>
                 <p className="text-xs text-[var(--secondary-foreground)]/80 leading-relaxed">
-                  คุณไม่มีบิลผ่อนชำระคงค้างในรอบบิลเดือนนี้ค่ะ ขอบพระคุณอย่างสูงสำหรับการชำระยอดที่ตรงเวลาอันยอดเยี่ยมเสมอมานะคะ! 💖
+                  คุณไม่มีบิลผ่อนชำระคงค้างในรอบบิลเดือนนี้ค่ะ
+                  ขอบพระคุณอย่างสูงสำหรับการชำระยอดที่ตรงเวลาอันยอดเยี่ยมเสมอมานะคะ! 💖
                 </p>
               </div>
             )}
@@ -523,34 +579,44 @@ function CustomerBillPortal() {
               <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-[var(--border)] p-6 shadow-xl space-y-4">
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="h-4.5 w-4.5 text-[var(--primary)]" />
-                  <span className="text-xs font-bold text-[var(--primary)] uppercase tracking-wider">แจ้งโอนเงินด้วย AI</span>
+                  <span className="text-xs font-bold text-[var(--primary)] uppercase tracking-wider">
+                    แจ้งโอนเงินด้วย AI
+                  </span>
                 </div>
 
                 {/* Image Drop Area */}
                 <div>
                   {slipPreview ? (
                     <div className="relative w-full h-[180px] rounded-xl overflow-hidden border border-[var(--border)] bg-black/5 flex items-center justify-center shadow-inner">
-                      <img src={slipPreview} alt="Slip" className="object-contain w-full h-full max-h-[160px]" />
+                      <img
+                        src={slipPreview}
+                        alt="Slip"
+                        className="object-contain w-full h-full max-h-[160px]"
+                      />
                       {isScanning && (
                         <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px] flex flex-col items-center justify-center">
                           {/* Laser line animation */}
                           <div className="absolute left-0 right-0 h-1 bg-[var(--primary)] shadow-[0_0_12px_2px_var(--primary)] animate-scan" />
                           <div className="p-2 bg-[var(--primary)] rounded-xl flex flex-col items-center gap-1.5 border border-[var(--border)]">
                             <Loader2 className="h-5 w-5 text-white animate-spin" />
-                            <span className="text-[10px] font-semibold text-white">AI กำลังตรวจสอบสลิป...</span>
+                            <span className="text-[10px] font-semibold text-white">
+                              AI กำลังตรวจสอบสลิป...
+                            </span>
                           </div>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div 
+                    <div
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full h-[140px] border border-dashed border-[var(--border)] hover:border-[var(--primary)] bg-[var(--secondary)]/50 rounded-xl flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-all active:scale-98 shadow-sm group"
                     >
                       <div className="h-9 w-9 rounded-full bg-[var(--primary)]/5 grid place-items-center text-[var(--primary)] group-hover:scale-110 transition-transform mb-3 border border-[var(--border)]">
                         <Upload className="h-5 w-5" />
                       </div>
-                      <span className="text-xs font-bold text-[var(--primary)]">อัปโหลดสลิปที่หน้านี้</span>
+                      <span className="text-xs font-bold text-[var(--primary)]">
+                        อัปโหลดสลิปที่หน้านี้
+                      </span>
                       <span className="text-[10px] text-[var(--secondary-foreground)]/80 mt-1 max-w-[180px]">
                         แตะเพื่อเลือกภาพหลักฐานสลิปโอนเงินของคุณ
                       </span>
@@ -593,26 +659,44 @@ function CustomerBillPortal() {
                         {/* Extracted Details block */}
                         <div className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-3 space-y-2 text-xs">
                           <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 mb-2">
-                            <span className="text-[9px] uppercase font-bold text-[var(--secondary-foreground)]">ผลวิเคราะห์ออโต้</span>
+                            <span className="text-[9px] uppercase font-bold text-[var(--secondary-foreground)]">
+                              ผลวิเคราะห์ออโต้
+                            </span>
                             {scannedDetails.isValid ? (
-                              <span className="text-[9px] font-bold bg-[var(--primary)]/10 text-[var(--primary)] px-1.5 py-0.5 rounded-md border border-[var(--primary)]/20">✓ สลิปถูกต้อง</span>
+                              <span className="text-[9px] font-bold bg-[var(--primary)]/10 text-[var(--primary)] px-1.5 py-0.5 rounded-md border border-[var(--primary)]/20">
+                                ✓ สลิปถูกต้อง
+                              </span>
                             ) : (
-                              <span className="text-[9px] font-bold bg-[#e48aaa]/10 text-[#e48aaa] px-1.5 py-0.5 rounded-md border border-[#e48aaa]/20">⚠️ ไม่สมบูรณ์</span>
+                              <span className="text-[9px] font-bold bg-[#e48aaa]/10 text-[#e48aaa] px-1.5 py-0.5 rounded-md border border-[#e48aaa]/20">
+                                ⚠️ ไม่สมบูรณ์
+                              </span>
                             )}
                           </div>
-                          
+
                           <div className="space-y-1 font-sans">
                             <div className="flex justify-between">
-                              <span className="text-[var(--secondary-foreground)] text-[10px]">ผู้โอน:</span>
-                              <span className="font-semibold text-[var(--primary)] truncate max-w-[140px]">{scannedDetails.sender}</span>
+                              <span className="text-[var(--secondary-foreground)] text-[10px]">
+                                ผู้โอน:
+                              </span>
+                              <span className="font-semibold text-[var(--primary)] truncate max-w-[140px]">
+                                {scannedDetails.sender}
+                              </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-[var(--secondary-foreground)] text-[10px]">ยอดโอน:</span>
-                              <span className="font-bold text-[var(--primary)]">{baht(scannedDetails.amount)}</span>
+                              <span className="text-[var(--secondary-foreground)] text-[10px]">
+                                ยอดโอน:
+                              </span>
+                              <span className="font-bold text-[var(--primary)]">
+                                {baht(scannedDetails.amount)}
+                              </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-[var(--secondary-foreground)] text-[10px]">วันเวลาโอน:</span>
-                              <span className="text-[var(--primary)] font-mono text-[10px]">{scannedDetails.date} ({scannedDetails.time})</span>
+                              <span className="text-[var(--secondary-foreground)] text-[10px]">
+                                วันเวลาโอน:
+                              </span>
+                              <span className="text-[var(--primary)] font-mono text-[10px]">
+                                {scannedDetails.date} ({scannedDetails.time})
+                              </span>
                             </div>
                           </div>
                         </div>

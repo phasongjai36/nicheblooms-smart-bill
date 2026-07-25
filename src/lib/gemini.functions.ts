@@ -114,9 +114,7 @@ Return ONLY a valid JSON object. Do not include markdown block wrappers or extra
           }
         } else {
           const errorText = await response.text();
-          console.warn(
-            `Gemini API failed [${response.status}]: ${errorText}.`,
-          );
+          console.warn(`Gemini API failed [${response.status}]: ${errorText}.`);
         }
       } catch (geminiError) {
         console.error("Gemini scanning failed:", geminiError);
@@ -141,9 +139,10 @@ Extract the following transaction details and return them strictly in JSON forma
 }
 Return ONLY a valid JSON object. Do not include markdown block wrappers or extra text.`;
 
-        const imageUrl = data.imagePrefix && data.imagePrefix.startsWith("data:")
-          ? data.imagePrefix + data.base64Data
-          : `data:image/jpeg;base64,${data.base64Data}`;
+        const imageUrl =
+          data.imagePrefix && data.imagePrefix.startsWith("data:")
+            ? data.imagePrefix + data.base64Data
+            : `data:image/jpeg;base64,${data.base64Data}`;
 
         const gwResponse = await fetch("https://ai-gateway.vercel.sh/v1/chat/completions", {
           method: "POST",

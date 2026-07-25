@@ -2,9 +2,9 @@ name: CI - Code Quality & Build Check
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   lint-and-type-check:
@@ -18,8 +18,8 @@ jobs:
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 📦 Install dependencies
         run: npm ci
@@ -45,8 +45,8 @@ jobs:
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 📦 Install dependencies
         run: npm ci
@@ -76,8 +76,8 @@ jobs:
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: 🔒 Run npm audit
         run: npm audit --audit-level=high
@@ -104,7 +104,7 @@ jobs:
           echo "✓ Build Verification: ${{ needs.build.result }}"
           echo "✓ Security Audit:     ${{ needs.security.result }}"
           echo "========================================"
-          
+
           # เช็คว่ามี job ไหนพังไหม เพื่อรายงานผลภาพรวมให้ถูกต้อง
           if [[ "${{ needs.lint-and-type-check.result }}" == "success" && "${{ needs.build.result }}" == "success" && "${{ needs.security.result }}" == "success" ]]; then
             echo "🚀 All checks passed successfully!"

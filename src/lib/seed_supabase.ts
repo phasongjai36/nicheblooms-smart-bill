@@ -3,7 +3,9 @@ import masterDb from "./latest_master.json";
 
 async function seed() {
   if (!supabaseAdmin) {
-    console.error("❌ Error: supabaseAdmin is not initialized. Please ensure SUPABASE_SECRET_KEY is set in your .env or .env.local.");
+    console.error(
+      "❌ Error: supabaseAdmin is not initialized. Please ensure SUPABASE_SECRET_KEY is set in your .env or .env.local.",
+    );
     return;
   }
 
@@ -43,9 +45,7 @@ async function seed() {
   }));
 
   console.log(`Inserting ${contractsToInsert.length} contracts...`);
-  const { error: contractError } = await supabaseAdmin
-    .from("contracts")
-    .insert(contractsToInsert);
+  const { error: contractError } = await supabaseAdmin.from("contracts").insert(contractsToInsert);
 
   if (contractError) {
     console.error("❌ Error inserting contracts:", contractError);
